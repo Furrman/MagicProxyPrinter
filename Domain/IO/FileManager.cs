@@ -69,7 +69,7 @@ public class FileManager(ILogger<FileManager> logger)
 
     public async Task CreateImageFile(byte[] content, string folderPath, string fileName)
     {
-        var path = Path.Combine(folderPath, fileName);
+        var path = Path.Combine(folderPath, $"{fileName}.jpg");
         try
         {
             await File.WriteAllBytesAsync(path, content);

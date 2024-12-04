@@ -80,7 +80,7 @@ public class WordGeneratorService(ILogger<WordGeneratorService> logger, IScryfal
                     }
                     if (saveImages)
                     {
-                        await _fileManager.CreateImageFile(imageContent, outputFolderPath, cardSide.ImageUrl);
+                        await _fileManager.CreateImageFile(imageContent, outputFolderPath, cardSide.Name);
                     }
 
                     AddImageToWord(paragraph, cardSide.Name, imageContent, card.Quantity);

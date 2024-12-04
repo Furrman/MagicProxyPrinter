@@ -26,7 +26,7 @@ public class ArchidektClient(HttpClient httpClient, ILogger<ArchidektClient> log
     public async Task<DeckDTO?> GetDeck(int deckId)
     {
         DeckDTO? deckDto = null;
-        var requestUrl = $"/api/decks/{deckId}/";
+        var requestUrl = $"api/decks/{deckId}/";
         HttpResponseMessage response;
         try
         {
@@ -47,7 +47,7 @@ public class ArchidektClient(HttpClient httpClient, ILogger<ArchidektClient> log
             catch (Exception ex)
             {
                 _logger.LogError(ex, "DeckId: {deckId} Error in parsing card list from the deck", deckId);
-                return deckDto;
+                return null;
             }
         }
         else

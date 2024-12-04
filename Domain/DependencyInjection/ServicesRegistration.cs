@@ -12,10 +12,8 @@ public static class ServicesRegistration
     public static IServiceCollection RegisterDomainClasses(this IServiceCollection services)
     {
         return services
+            // Facades
             .AddScoped<IMagicProxyPrinter, MagicProxyPrinter>()
-            // Clients
-            .AddScoped<IArchidektClient, ArchidektClient>()
-            .AddScoped<IScryfallClient, ScryfallApiClient>()
             // Factories
             .AddScoped<IDeckRetrieverFactory, DeckRetrieverFactory>()
             // IO

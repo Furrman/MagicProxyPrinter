@@ -45,10 +45,10 @@ public interface IScryfallClient
     Task<CardSearchDTO?> SearchCard(string cardName, bool includeExtras, bool includeMultilingual);
 }
 
-public class ScryfallApiClient(HttpClient httpClient, ILogger<ScryfallApiClient> logger) : IScryfallClient
+public class ScryfallClient(HttpClient httpClient, ILogger<ScryfallClient> logger) : IScryfallClient
 {
     private readonly HttpClient _httpClient = httpClient;
-    private readonly ILogger<ScryfallApiClient> _logger = logger;
+    private readonly ILogger<ScryfallClient> _logger = logger;
 
     public async Task<byte[]?> DownloadImage(string imageUrl)
     {

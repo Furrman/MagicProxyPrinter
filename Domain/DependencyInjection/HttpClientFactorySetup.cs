@@ -4,6 +4,7 @@ using Polly;
 using Polly.Extensions.Http;
 
 using Domain.Clients;
+using System.Net.Http.Headers;
 
 namespace Domain.DependencyInjection;
 
@@ -11,16 +12,18 @@ public static class HttpClientFactorySetup
 {
     public static IServiceCollection ConfigureHttpClients(this IServiceCollection services)
     {
-        services.AddHttpClient<ArchidektClient>(client =>
+        services.AddHttpClient<IArchidektClient, ArchidektClient>(client =>
         {
             client.BaseAddress = new Uri("https://archidekt.com/");
             client.Timeout = TimeSpan.FromSeconds(30);
         })
         .AddPolicyHandler(GetRetryPolicy());
-        services.AddHttpClient<ScryfallApiClient>(client =>
+        services.AddHttpClient<IScryfallClient, ScryfallClient>(client =>
         {
             client.BaseAddress = new Uri("https://api.scryfall.com/");
             client.Timeout = TimeSpan.FromSeconds(30);
+            client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter/2.0");
+
         })
         .AddPolicyHandler(GetRetryPolicy());
 
