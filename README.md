@@ -1,12 +1,12 @@
-# ArchidektProxyPrinter
+# MagicProxyPrinter
 
 Have you ever thought about building your deck in Magic The Gathering? Have you ever found yourself missing some cards for your newly created deck, but still wanted to give it a try? Do you need some card replacements until your new cards arrive? Or perhaps you want to build a deck before spending real money on it?
 
-If so, then this application is for you! It allows you to generate a printable and editable document with cards from a deck stored in Archidekt or exported to a text file. With this application, you can easily print your previously created deck and try it out at the table with your friend(s)!
+If so, then this application is for you! It allows you to generate a printable and editable document with cards from a deck stored online or exported to a text file. With this application, you can easily print your previously created deck and try it out at the table with your friend(s)!
 
 ## Features
 
-- Download deck list straight from archidekt via url 
+- Download deck list straight from Archidekt via url 
 - Get deck list from exported file
 - Add cards number of times per number of quantity
 - Print dual side cards
@@ -15,17 +15,18 @@ If so, then this application is for you! It allows you to generate a printable a
 - Save cards resized and adjusted for printing in editable Word .docx format
 - Option to download all cards in specific language (cards not found in given language will be replaced with default english language)
 - Option to add related tokens from cards in the deck
+- Option to group tokens based on name and print only single copies of that card
 - Option to store original images alongside created document
 - Logs in separate file showing errors in receiving data
 - Show % progress status in console app
 
 ## Plans
 
+- Support to other tools like Moxfield, EDHREC, MTGArena or MTGGoldfish
 - Produce read-only PDF document instead of Word
 - Create Web version in ASP.NET API with Blazor
 - Host Web version via Github Pages
 - Build Web version via Github Actions
-- Support to other tools like Moxfield, EDHREC, MTGArena or MTGGoldfish
 
 ## Limitation
 
@@ -33,7 +34,6 @@ If so, then this application is for you! It allows you to generate a printable a
 - Custom cards are not supported (Archidekt does not support unofficial cards)
 - Foil version of non unique card arts are not supported (Scryfall API that provide high quality foil card images except etched foil and unique foiled arts)
 - Import based on file exported from Archidekt does not support specific card version (missing *card number* information in exported file)
-- Supports only cards in english or unique version of cards (Archidekt is not supporting different card language versions https://archidekt.com/forum/thread/2627536/1 )
 
 ## Usage
 
@@ -44,16 +44,16 @@ Call ArchidektProxyPrinter file (can have .exe extension) from command liner wit
 
 List of all parameters:
 ```
-Usage: ArchidektProxyP [--deck-file-path <String>] [--deck-url <String>] [--language-code <String>] [--token-copies <Int32>] [--print-all-tokens] [--output-path <String>] [--output-file-name <String>] [--store-original-images] [--help] [--version]
+Usage: MagicProxyPrint [--deck-file-path <String>] [--deck-url <String>] [--language-code <String>] [--token-copies <Int32>] [--group-tokens] [--output-path <String>] [--output-file-name <String>] [--store-original-images] [--help] [--version]
 
-ArchidektProxyPrinter
+MagicProxyPrinter
 
 Options:
   --deck-file-path <String>      Filepath to exported deck from Archidekt
   --deck-url <String>            URL link to deck in Archidekt
   --language-code <String>       Set language for all cards to print
   --token-copies <Int32>         Number of copy for each token
-  --print-all-tokens             Print all tokens or reduce different version of the same token
+  --group-tokens                 Group tokens based on the name
   --output-path <String>         Directory path to output file(s)
   --output-file-name <String>    Filename of the output word file
   --store-original-images        Flag to store original images in the same folder as output file
@@ -63,7 +63,7 @@ Options:
 
 ## Installation
 
-Download existing file from Github Releases section of this project https://github.com/Furrman/ArchidektProxyPrinter and put it anywhere you want. You can add path to this console app in your PATH environment variable.
+Download existing file from Github Releases section of this project https://github.com/Furrman/MagicProxyPrinter/releases and put it anywhere you want. You can add path to this console app in your PATH environment variable.
 
 ## Instruction
 

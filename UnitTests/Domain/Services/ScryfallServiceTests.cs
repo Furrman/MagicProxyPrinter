@@ -305,9 +305,35 @@ public class ScryfallServiceTests
             .ReturnsAsync(new CardDataDTO { Name = "Card 1 Token", ImageUriData = new CardImageUriDTO("https://example.com/token.jpg") });
         
         // Act
-        await _service.UpdateCardImageLinks(cards, tokenCopies: 1, printAllTokens: false);
+        await _service.UpdateCardImageLinks(cards, tokenCopies: 1, groupTokens: true);
 
         // Assert
         cards.Should().ContainSingle(card => card.Name == "Token" && card.Quantity == 1);
+    }
+    
+    [Fact]
+    public async Task UpdateCardImageLinks_WhenTokenCopyNumberSpecifiedAndGroupingTokensUnset_ShouldAddTheSameTokenMoreTimesThanSpecified()
+    {
+        // Arrange
+        List<CardEntryDTO> cards =
+        [
+            new() { Name = "Card 1" },
+            new() { Name = "Card 2" }
+        ];
+        var tokenId = Guid.NewGuid();
+        _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(new CardSearchDTO(
+                [
+                    new CardDataDTO { Name = "Card 1", AllParts = [new CardPartDTO("Token", ScryfallParts.TOKEN, $"https://example.com/{tokenId}")] },
+                    new CardDataDTO { Name = "Card 2", AllParts = [new CardPartDTO("Token", ScryfallParts.TOKEN, $"https://example.com/{tokenId}")] }
+                ]));
+        _scryfallClientMock.Setup(api => api.GetCard(tokenId))
+            .ReturnsAsync(new CardDataDTO { Name = "Token", ImageUriData = new CardImageUriDTO("https://example.com/token.jpg") });
+        
+        // Act
+        await _service.UpdateCardImageLinks(cards, tokenCopies: 1, groupTokens: false);
+
+        // Assert
+        cards.Where(card => card.Name == "Token").Should().HaveCount(2);
     }
 }

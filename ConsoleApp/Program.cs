@@ -22,7 +22,7 @@ internal class Program
             [CoconoaOptions(Description = "URL link to deck in Archidekt")]string? deckUrl,
             [CoconoaOptions(Description = "Set language for all cards to print")] string? languageCode = null,
             [CoconoaOptions(Description = "Number of copy for each token")] int? tokenCopies = null,
-            [CoconoaOptions(Description = "Print all tokens or reduce different version of the same token")] bool printAllTokens = false,
+            [CoconoaOptions(Description = "Group tokens based on the name")] bool groupTokens = false,
             [CoconoaOptions(Description = "Directory path to output file(s)")]string? outputPath = null,
             [CoconoaOptions(Description = "Filename of the output word file")]string? outputFileName = null,
             [CoconoaOptions(Description = "Flag to store original images in the same folder as output file")] bool storeOriginalImages = false) =>
@@ -31,7 +31,9 @@ internal class Program
             {
                 ConsoleUtility.WriteErrorMessage(@"You have to provide at least one from this list:
                 - path to exported deck
-                - url to your deck.");
+                - url to your deck.
+                
+                Use --help to see more information.");
                 return;
             }
 
@@ -62,7 +64,7 @@ internal class Program
                 outputFileName, 
                 languageCode,
                 tokenCopies ?? 0,
-                printAllTokens,
+                groupTokens,
                 storeOriginalImages).Wait();
         });
     }

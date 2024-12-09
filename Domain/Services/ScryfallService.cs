@@ -35,8 +35,11 @@ public interface IScryfallService
     /// </summary>
     /// <param name="cards">The list of card entries to update.</param>
     /// <param name="languageCode">The language code for localization (optional).</param>
+    /// <param name="tokenCopies">Quantity of each token (optional).</param>
+    /// <param name="groupTokens">Group tokens based on name (optional).</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task UpdateCardImageLinks(List<CardEntryDTO> cards, string? languageCode = null, int tokenCopies = 0, bool printAllTokens = false);
+    Task UpdateCardImageLinks(List<CardEntryDTO> cards, 
+        string? languageCode = null, int tokenCopies = 0, bool groupTokens = false);
 }
 
 public class ScryfallService(IScryfallClient scryfallApiClient, 
@@ -70,7 +73,8 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
         }
     }
 
-    public async Task UpdateCardImageLinks(List<CardEntryDTO> cards, string? languageCode = null, int tokenCopies = 0, bool printAllTokens = false)
+    public async Task UpdateCardImageLinks(List<CardEntryDTO> cards, 
+        string? languageCode = null, int tokenCopies = 0, bool groupTokens = false)
     {
         try
         {
@@ -86,7 +90,7 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
                 step = UpdateStep(step, count);
             }
 
-            await UpdateTokens(cards, tokenCopies, printAllTokens);
+            await UpdateTokens(cards, tokenCopies, groupTokens);
         }
         catch (Exception ex)
         {
@@ -211,12 +215,12 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
         }
     }
 
-    private async Task UpdateTokens(List<CardEntryDTO> cards, int tokenCopies, bool printAllTokens)
+    private async Task UpdateTokens(List<CardEntryDTO> cards, int tokenCopies, bool groupTokens)
     {
         // Casting to list, because it is gonna be modified
         var tokens = cards.SelectMany(c => c.Tokens)
             .ToList();
-        if (!printAllTokens)
+        if (groupTokens)
         {
             tokens = tokens.GroupBy(t => t.Name)
                 .Select(g => g.First())
