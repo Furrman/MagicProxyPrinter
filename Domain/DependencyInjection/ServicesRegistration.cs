@@ -22,6 +22,7 @@ public static class ServicesRegistration
             .AddScoped<IWordDocumentWrapper, WordDocumentWrapper>()
             // Services
             .AddScoped<IArchidektService, ArchidektService>()
+            .AddScoped<IMoxfieldService, MoxfieldService>()
             .AddScoped<IScryfallService, ScryfallService>()
             .AddScoped<ILanguageService, LanguageService>()
             .AddScoped<IWordGeneratorService, WordGeneratorService>()
