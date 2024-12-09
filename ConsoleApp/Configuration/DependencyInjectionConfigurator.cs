@@ -1,5 +1,6 @@
-﻿using Library.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+using Domain.DependencyInjection;
 
 namespace ConsoleApp.Configuration;
 
@@ -8,7 +9,8 @@ internal static class DependencyInjectionConfigurator
     public static IServiceProvider Setup()
     {
         var serviceProvider = new ServiceCollection()
-            .SetupLibraryClasses()
+            .RegisterDomainClasses()
+            .ConfigureHttpClients()
             .SetupNLog()
             .BuildServiceProvider();
 

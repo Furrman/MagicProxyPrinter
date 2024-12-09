@@ -3,11 +3,12 @@
 using CoconoaApp = Cocona.CoconaLiteApp;
 using CoconoaOptions = Cocona.OptionAttribute;
 
+using Domain;
+using Domain.Services;
+using Domain.Models.Events;
+
 using ConsoleApp.Configuration;
 using ConsoleApp.Helpers;
-using Library;
-using Library.Services;
-using Library.Models.Events;
 
 namespace ConsoleApp;
 
@@ -18,52 +19,26 @@ internal class Program
         var serviceProvider = DependencyInjectionConfigurator.Setup();
 
         CoconoaApp.Run(([CoconoaOptions(Description = "Filepath to exported deck from Archidekt")] string? deckFilePath,
-            [CoconoaOptions(Description = "ID of the deck in Archidekt")] int? deckId,
             [CoconoaOptions(Description = "URL link to deck in Archidekt")]string? deckUrl,
             [CoconoaOptions(Description = "Set language for all cards to print")] string? languageCode = null,
             [CoconoaOptions(Description = "Number of copy for each token")] int? tokenCopies = null,
-            [CoconoaOptions(Description = "Print all tokens or reduce different version of the same token")] bool printAllTokens = false,
+            [CoconoaOptions(Description = "Group tokens based on the name")] bool groupTokens = false,
             [CoconoaOptions(Description = "Directory path to output file(s)")]string? outputPath = null,
             [CoconoaOptions(Description = "Filename of the output word file")]string? outputFileName = null,
             [CoconoaOptions(Description = "Flag to store original images in the same folder as output file")] bool storeOriginalImages = false) =>
         {
-            if (deckFilePath is not null)
-            {
-                if (!Path.Exists(deckFilePath))
-                {
-                    ConsoleUtility.WriteErrorMessage("You have to specify correct PATH to your card list exported from Archidekt.");
-                    return;
-                }
-            }
-            else if (deckId is not null)
-            {
-                if (deckId <= 0)
-                {
-                    ConsoleUtility.WriteErrorMessage("You have to specify correct ID of your deck in Archidekt.");
-                    return;
-                }
-            }
-            else if (deckUrl is not null)
-            {
-                var archidektService = serviceProvider.GetService<IArchidektService>()!;
-                if (!archidektService.TryExtractDeckIdFromUrl(deckUrl, out var urlDeckId) || urlDeckId <= 0)
-                {
-                    ConsoleUtility.WriteErrorMessage("You have to specify correct URL to your deck hosted by Archidekt.");
-                    return;
-                }
-                deckId = urlDeckId;
-            }
-            else
+            if (deckUrl is null && deckUrl is null)
             {
                 ConsoleUtility.WriteErrorMessage(@"You have to provide at least one from this list:
                 - path to exported deck
-                - deck id
-                - url to your deck.");
+                - url to your deck.
+                
+                Use --help to see more information.");
                 return;
             }
 
             var languageService = serviceProvider.GetService<ILanguageService>()!;
-            if (languageService.IsValidLanguage(languageCode) == false)
+            if (languageCode is not null && languageService.IsValidLanguage(languageCode) == false)
             {
                 ConsoleUtility.WriteErrorMessage("You have to specify correct language code.");
                 ConsoleUtility.WriteErrorMessage($"Language codes: {languageService.AvailableLanguages}");
@@ -81,15 +56,15 @@ internal class Program
                 return;
             }
 
-            var archidektPrinter = serviceProvider.GetService<IArchidektPrinter>()!;
+            var archidektPrinter = serviceProvider.GetService<IMagicProxyPrinter>()!;
             archidektPrinter.ProgressUpdate += UpdateProgressOnConsole;
-            archidektPrinter.GenerateWord(deckId, 
+            archidektPrinter.GenerateWord(deckUrl, 
                 deckFilePath, 
                 outputPath, 
                 outputFileName, 
                 languageCode,
                 tokenCopies ?? 0,
-                printAllTokens,
+                groupTokens,
                 storeOriginalImages).Wait();
         });
     }
