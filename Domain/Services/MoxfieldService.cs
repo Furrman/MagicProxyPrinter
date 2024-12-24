@@ -28,14 +28,25 @@ public class MoxfieldService(IMoxfieldClient moxfieldClient, ILogger<MoxfieldSer
         TryExtractDeckIdFromUrl(deckUrl, out string deckId);
         
         var deckDto = await _moxfieldClient.GetDeck(deckId);
-        Console.WriteLine(JsonSerializer.Serialize(deckDto));
         if (deckDto is null)
         {
             _logger.LogError("Deck not loaded from internet");
             return null;
         }
 
-        var deck = new DeckDetailsDTO {  };
+        var deck = new DeckDetailsDTO 
+        {
+            Name = deckDto!.Name ?? string.Empty,
+            Cards = deckDto!.Boards?.SelectMany(x => x.Value.Cards?.Select(y => new CardEntryDTO
+            {
+                Id = Guid.TryParse(y.Value?.Card?.Scryfall_Id, out Guid guid) 
+                    ? guid 
+                    : null,
+                Name = y.Value?.Card?.Name ?? string.Empty,
+                Quantity = y.Value?.Quantity ?? 1
+            }) ?? [])
+            ?.ToList() ?? []
+        };
 
         return deck;
     }
