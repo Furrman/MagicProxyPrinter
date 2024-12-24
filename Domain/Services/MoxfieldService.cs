@@ -1,8 +1,11 @@
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 
+using Domain.Clients;
 using Domain.Factories;
 using Domain.Models.DTO;
+using Domain.Models.DTO.Moxfield;
 
 public interface IMoxfieldService : IDeckRetriever
 {
@@ -15,19 +18,24 @@ public interface IMoxfieldService : IDeckRetriever
     bool TryExtractDeckIdFromUrl(string url, out string deckId);
 }
 
-public class MoxfieldService(ILogger<MoxfieldService> logger) : IMoxfieldService
+public class MoxfieldService(IMoxfieldClient moxfieldClient, ILogger<MoxfieldService> logger) : IMoxfieldService
 {
+    private readonly IMoxfieldClient _moxfieldClient = moxfieldClient;
     private readonly ILogger<MoxfieldService> _logger = logger;
 
     public async Task<DeckDetailsDTO?> RetrieveDeckFromWeb(string deckUrl)
     {
         TryExtractDeckIdFromUrl(deckUrl, out string deckId);
         
-        DeckDetailsDTO? deck = null;
+        var deckDto = await _moxfieldClient.GetDeck(deckId);
+        Console.WriteLine(JsonSerializer.Serialize(deckDto));
+        if (deckDto is null)
+        {
+            _logger.LogError("Deck not loaded from internet");
+            return null;
+        }
 
-        // TODO Load deck from Moxfield
-
-        deck = new DeckDetailsDTO {  };
+        var deck = new DeckDetailsDTO {  };
 
         return deck;
     }
@@ -35,7 +43,7 @@ public class MoxfieldService(ILogger<MoxfieldService> logger) : IMoxfieldService
     public bool TryExtractDeckIdFromUrl(string url, out string deckId)
     {
         deckId = string.Empty;
-        string pattern = @"^https:\/\/(www\.)?moxfield\.com\/decks\/([a-zA-Z0-9]+)\/?$";
+        string pattern = @"^https:\/\/(www\.)?moxfield\.com\/decks\/([\w\-._~]+)\/?$";
         Regex regex = new(pattern);
 
         Match match = regex.Match(url);

@@ -4,20 +4,21 @@ using FluentAssertions;
 using Moq;
 
 using Domain.Clients;
-using Domain.Services;
-using Domain.Models.DTO;
+using Domain.Models.DTO.Moxfield;
 
 namespace UnitTests.Domain.Services;
 
 public class MoxfieldServiceTests
 {
+    private readonly Mock<IMoxfieldClient> _moxfieldClientMock;
     private readonly Mock<ILogger<MoxfieldService>> _loggerMock;
     private readonly MoxfieldService _service;
 
     public MoxfieldServiceTests()
     {
+        _moxfieldClientMock = new Mock<IMoxfieldClient>();
         _loggerMock = new Mock<ILogger<MoxfieldService>>();
-        _service = new MoxfieldService(_loggerMock.Object);
+        _service = new MoxfieldService(_moxfieldClientMock.Object, _loggerMock.Object);
     }
 
     [Theory]
@@ -51,8 +52,8 @@ public class MoxfieldServiceTests
     public async Task RetrieveDeckFromWeb_WithValidDeckId_ReturnsDeckDetails()
     {
         // Arrange
-        string deckUrl = "https://moxfield.com/decks/123456/test";
-        var deckDto = new DeckDetailsDTO();
+        string deckUrl = "https://moxfield.com/decks/123fdgd23456";
+        _moxfieldClientMock.Setup(x => x.GetDeck(It.IsAny<string>())).ReturnsAsync(new DeckDTO());
 
         // Act
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
