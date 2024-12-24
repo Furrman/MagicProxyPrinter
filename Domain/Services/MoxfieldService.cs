@@ -1,11 +1,11 @@
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 
 using Domain.Clients;
 using Domain.Factories;
 using Domain.Models.DTO;
-using Domain.Models.DTO.Moxfield;
+
+namespace Domain.Services;
 
 public interface IMoxfieldService : IDeckRetriever
 {
