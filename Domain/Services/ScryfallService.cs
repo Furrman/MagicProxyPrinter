@@ -135,10 +135,15 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
 
     private async Task<CardDataDTO?> SearchCard(CardEntryDTO card, string? languageCode = null)
     {
+        if (card.Id != null)
+        {
+            return await _scryfallApiClient.GetCard(card.Id.Value);
+        }
+
         // Check if we have enough details about specific card for a Find instead of Search
         var cardSearch = card.ExpansionCode != null && card.CollectorNumber != null
-            ? new([await _scryfallApiClient.FindCard(card.Name, card.ExpansionCode, card.CollectorNumber, languageCode)])
-            : await _scryfallApiClient.SearchCard(card.Name, card.ExpansionCode is not null || card.Etched || card.Art, languageCode != null);
+                ? new([await _scryfallApiClient.FindCard(card.Name, card.ExpansionCode, card.CollectorNumber, languageCode)])
+                : await _scryfallApiClient.SearchCard(card.Name, card.ExpansionCode is not null || card.Etched || card.Art, languageCode != null);
 
         // Look for searched card in the search result
         var searchedCard = cardSearch?.Data?.FirstOrDefault(c =>

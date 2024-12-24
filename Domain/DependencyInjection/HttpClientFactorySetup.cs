@@ -16,16 +16,20 @@ public static class HttpClientFactorySetup
         {
             client.BaseAddress = new Uri("https://archidekt.com/");
             client.Timeout = TimeSpan.FromSeconds(30);
-        })
-        .AddPolicyHandler(GetRetryPolicy());
+        }).AddPolicyHandler(GetRetryPolicy());
+        services.AddHttpClient<IMoxfieldClient, MoxfieldClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://api2.moxfield.com/v3/");
+            client.Timeout = TimeSpan.FromSeconds(30);
+            client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter");
+        }).AddPolicyHandler(GetRetryPolicy());
         services.AddHttpClient<IScryfallClient, ScryfallClient>(client =>
         {
             client.BaseAddress = new Uri("https://api.scryfall.com/");
             client.Timeout = TimeSpan.FromSeconds(30);
-            client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter/2.0");
+            client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter");
 
-        })
-        .AddPolicyHandler(GetRetryPolicy());
+        }).AddPolicyHandler(GetRetryPolicy());
 
         return services;
     }

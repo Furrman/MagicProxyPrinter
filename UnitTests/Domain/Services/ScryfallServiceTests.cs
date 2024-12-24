@@ -111,7 +111,27 @@ public class ScryfallServiceTests
     }
 
     [Fact]
-    public async Task UpdateCardImageLinks_WhenCardIsNotFound_ShouldNotUpdateCardImageLinks()
+    public async Task UpdateCardImageLinks_WhenCardsIdsAreProvided_ShouldSetCardImageLinks()
+    {
+        // Arrange
+        List<CardEntryDTO> cards =
+        [
+            new() { Id = Guid.NewGuid() }
+        ];
+
+        _scryfallClientMock.Setup(api => api.GetCard(It.IsAny<Guid>()))
+            .ReturnsAsync(new CardDataDTO { Name = "Card 1", ImageUriData = new CardImageUriDTO("https://example.com/card1.jpg") });
+
+        // Act
+        await _service.UpdateCardImageLinks(cards);
+
+        // Assert
+        _scryfallClientMock.Verify(api => api.GetCard(It.IsAny<Guid>()), Times.Once);
+        cards[0].CardSides.First().ImageUrl.Should().Be("https://example.com/card1.jpg");
+    }
+
+    [Fact]
+    public async Task UpdateCardImageLinks_WhenCardNotFound_ShouldNotUpdateCardImageLinks()
     {
         // Arrange
         List<CardEntryDTO> cards =

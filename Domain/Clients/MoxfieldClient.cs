@@ -1,32 +1,32 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 
-using Domain.Models.DTO.Archidekt;
+using Domain.Models.DTO.Moxfield;
 
 namespace Domain.Clients;
 
 /// <summary>
 /// Represents an interface for interacting with the Archidekt API.
 /// </summary>
-public interface IArchidektClient
+public interface IMoxfieldClient
 {
     /// <summary>
-    /// Retrieves a deck from the Archidekt API based on the specified deck ID.
+    /// Retrieves a deck from the Moxfield API based on the specified deck ID.
     /// </summary>
     /// <param name="deckId">The ID of the deck to retrieve.</param>
     /// <returns>Deck details if request was successful, or <c>null</c> if the deck was not found.</returns>
-    Task<DeckDTO?> GetDeck(int deckId);
+    Task<DeckDTO?> GetDeck(string deckId);
 }
 
-public class ArchidektClient(HttpClient httpClient, ILogger<ArchidektClient> logger) : IArchidektClient
+public class MoxfieldClient(HttpClient httpClient, ILogger<MoxfieldClient> logger) : IMoxfieldClient
 {
     private readonly HttpClient _httpClient = httpClient;
-    private readonly ILogger<ArchidektClient> _logger = logger;
+    private readonly ILogger<MoxfieldClient> _logger = logger;
 
-    public async Task<DeckDTO?> GetDeck(int deckId)
+    public async Task<DeckDTO?> GetDeck(string deckId)
     {
         DeckDTO? deckDto = null;
-        var requestUrl = $"api/decks/{deckId}/";
+        var requestUrl = $"decks/all/{deckId}";
         HttpResponseMessage response;
         try
         {
