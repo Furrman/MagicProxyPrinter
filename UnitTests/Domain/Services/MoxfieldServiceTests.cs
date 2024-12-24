@@ -101,7 +101,7 @@ public class MoxfieldServiceTests
                                 "ID", 
                                 new CardDTO(
                                     2, 
-                                    new CardDetailsDTO("ID", cardId.ToString(), "UNIQUE_ID", "Test Card 1")
+                                    new CardDetailsDTO("ID", cardId, "UNIQUE_ID", "Test Card 1")
                                 )
                             } 
                         } 

@@ -39,14 +39,13 @@ public class MoxfieldService(IMoxfieldClient moxfieldClient, ILogger<MoxfieldSer
             Name = deckDto!.Name ?? string.Empty,
             Cards = deckDto!.Boards?.SelectMany(x => x.Value.Cards?.Select(y => new CardEntryDTO
             {
-                Id = Guid.TryParse(y.Value?.Card?.Scryfall_Id, out Guid guid) 
-                    ? guid 
-                    : null,
+                Id = y.Value?.Card?.Scryfall_Id,
                 Name = y.Value?.Card?.Name ?? string.Empty,
                 Quantity = y.Value?.Quantity ?? 1
             }) ?? [])
             ?.ToList() ?? []
         };
+
 
         return deck;
     }
