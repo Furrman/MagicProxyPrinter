@@ -29,10 +29,13 @@ public interface IDeckRetrieverFactory
     IDeckRetriever? GetDeckRetriever(string deckUrl);
 }
 
-public class DeckRetrieverFactory(IArchidektService archidektService,
+public class DeckRetrieverFactory(
+    IArchidektService archidektService,
+    IEdhrecService edhrecService,
     IMoxfieldService moxfieldService) : IDeckRetrieverFactory
 {
     private readonly IArchidektService _archidektService = archidektService;
+    private readonly IEdhrecService _edhrecService = edhrecService;
     private readonly IMoxfieldService _moxfieldService = moxfieldService;
 
     public IDeckRetriever? GetDeckRetriever(string deckUrl)
@@ -40,6 +43,10 @@ public class DeckRetrieverFactory(IArchidektService archidektService,
         if (_archidektService.TryExtractDeckIdFromUrl(deckUrl, out int archidektDeckId))
         {
             return _archidektService;
+        }
+        if (_edhrecService.TryExtractDeckIdFromUrl(deckUrl, out string edhrecDeckId))
+        {
+            return _edhrecService;
         }
         if (_moxfieldService.TryExtractDeckIdFromUrl(deckUrl, out string moxfieldDeckId))
         {

@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-using Domain.Clients;
 using Domain.Factories;
 using Domain.IO;
 using Domain.Services;
@@ -22,6 +21,7 @@ public static class ServicesRegistration
             .AddScoped<IWordDocumentWrapper, WordDocumentWrapper>()
             // Services
             .AddScoped<IArchidektService, ArchidektService>()
+            .AddScoped<IEdhrecService, EdhrecService>()
             .AddScoped<IMoxfieldService, MoxfieldService>()
             .AddScoped<IScryfallService, ScryfallService>()
             .AddScoped<ILanguageService, LanguageService>()

@@ -398,6 +398,7 @@ FodyWeavers.xsd
 *.sln.iml
 /Properties/launchSettings.json
 /*.txt
+.idea/*
 
 MagicProxyPrinter_output/
 **/.DS_STORE
