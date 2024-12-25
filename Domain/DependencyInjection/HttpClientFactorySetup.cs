@@ -23,6 +23,12 @@ public static class HttpClientFactorySetup
             client.Timeout = TimeSpan.FromSeconds(30);
             client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter");
         }).AddPolicyHandler(GetRetryPolicy());
+        services.AddHttpClient<IEdhrecClient, EdhrecClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://edhrec.com/");
+            client.Timeout = TimeSpan.FromSeconds(30);
+            client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter");
+        }).AddPolicyHandler(GetRetryPolicy());
         services.AddHttpClient<IScryfallClient, ScryfallClient>(client =>
         {
             client.BaseAddress = new Uri("https://api.scryfall.com/");
