@@ -21,9 +21,12 @@ public interface IEdhrecService : IDeckRetriever
     bool TryExtractDeckIdFromUrl(string url, out string deckId);
 }
 
-public class EdhrecService(IEdhrecClient edhrecClient, ILogger<EdhrecService> logger) : IEdhrecService
+public class EdhrecService(IEdhrecClient edhrecClient,
+    IArchidektService archidektService,
+    ILogger<EdhrecService> logger) : IEdhrecService
 {
     private readonly IEdhrecClient _edhrecClient = edhrecClient;
+    private readonly IArchidektService _archidektService = archidektService;
     private readonly ILogger<EdhrecService> _logger = logger;
 
     public async Task<DeckDetailsDTO?> RetrieveDeckFromWeb(string deckUrl)
@@ -37,7 +40,7 @@ public class EdhrecService(IEdhrecClient edhrecClient, ILogger<EdhrecService> lo
             return null;
         }
 
-        var deck = ScrapDeckFromHtml(deckHtml);
+        var deck = await ScrapDeckFromHtml(deckHtml);
 
         return deck;
     }
@@ -59,14 +62,22 @@ public class EdhrecService(IEdhrecClient edhrecClient, ILogger<EdhrecService> lo
         return false;
     }
     
-    private DeckDetailsDTO ScrapDeckFromHtml(string htmlContent)
+    private async Task<DeckDetailsDTO?> ScrapDeckFromHtml(string htmlContent)
     {
-        var deck = new DeckDetailsDTO();
-        
         var htmlDoc = new HtmlDocument();
         htmlDoc.LoadHtml(htmlContent);
         
+        // Get Archidekt link to deck if it is available and retrieve deck from it instead
+        var sourceLinkNode = htmlDoc.DocumentNode.SelectSingleNode("//div[contains(text(), 'Source:')]/a");
+        if (sourceLinkNode != null)
+        {
+            string link = sourceLinkNode.GetAttributeValue("href", string.Empty);
+            link = HttpUtility.HtmlDecode(link);
+            return await _archidektService.RetrieveDeckFromWeb(link);
+        }
+        
         // Get the deck name
+        var deck = new DeckDetailsDTO();
         var deckNameNode = htmlDoc.DocumentNode.SelectSingleNode("//h3[contains(text(), 'Deck with')]");
         if (deckNameNode != null)
         {
@@ -81,10 +92,9 @@ public class EdhrecService(IEdhrecClient edhrecClient, ILogger<EdhrecService> lo
             {
                 string decodedName = HttpUtility.HtmlDecode(node.InnerText.Trim());
                 deck.Cards.Add(new CardEntryDTO { Name = decodedName, Quantity = 1 });
-                Console.WriteLine(decodedName);
             }
         }
-        
+
         return deck;
     }
 }
