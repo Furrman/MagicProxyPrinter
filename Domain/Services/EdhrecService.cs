@@ -22,11 +22,11 @@ public interface IEdhrecService : IDeckRetriever
 }
 
 public class EdhrecService(IEdhrecClient edhrecClient,
-    IArchidektService archidektService,
+    IDeckRetrieverFactory deckRetrieverFactory,
     ILogger<EdhrecService> logger) : IEdhrecService
 {
     private readonly IEdhrecClient _edhrecClient = edhrecClient;
-    private readonly IArchidektService _archidektService = archidektService;
+    private readonly IDeckRetrieverFactory _deckRetrieverFactory = deckRetrieverFactory;
     private readonly ILogger<EdhrecService> _logger = logger;
 
     public async Task<DeckDetailsDTO?> RetrieveDeckFromWeb(string deckUrl)
@@ -73,7 +73,11 @@ public class EdhrecService(IEdhrecClient edhrecClient,
         {
             string link = sourceLinkNode.GetAttributeValue("href", string.Empty);
             link = HttpUtility.HtmlDecode(link);
-            return await _archidektService.RetrieveDeckFromWeb(link);
+            var service = _deckRetrieverFactory.GetDeckRetriever(link);
+            if (service is not null)
+            {
+                return await service.RetrieveDeckFromWeb(link);
+            }
         }
         
         // Get the deck name

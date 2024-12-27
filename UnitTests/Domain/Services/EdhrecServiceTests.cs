@@ -4,6 +4,7 @@ using FluentAssertions;
 using Moq;
 
 using Domain.Clients;
+using Domain.Factories;
 using Domain.Models.DTO;
 using Domain.Services;
 
@@ -12,17 +13,17 @@ namespace UnitTests.Domain.Services;
 public class EdhrecServiceTests
 {
     private readonly Mock<IEdhrecClient> _edhrecClientMock;
-    private readonly Mock<IArchidektService> _archidektServiceMock;
+    private readonly Mock<IDeckRetrieverFactory> _deckRetrieverFactoryMock;
     private readonly Mock<ILogger<EdhrecService>> _loggerMock;
     private readonly EdhrecService _service;
 
     public EdhrecServiceTests()
     {
         _edhrecClientMock = new Mock<IEdhrecClient>();
-        _archidektServiceMock = new Mock<IArchidektService>();
+        _deckRetrieverFactoryMock = new Mock<IDeckRetrieverFactory>();
         _loggerMock = new Mock<ILogger<EdhrecService>>();
         _service = new EdhrecService(_edhrecClientMock.Object, 
-            _archidektServiceMock.Object,
+            _deckRetrieverFactoryMock.Object,
             _loggerMock.Object);
     }
 
@@ -178,7 +179,10 @@ public class EdhrecServiceTests
     {
         // Arrange
         string deckUrl = "https://edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA";
-        _archidektServiceMock.Setup(x => x.RetrieveDeckFromWeb(It.IsAny<string>()))
+        var archidektServiceMock = new Mock<IArchidektService>();
+        _deckRetrieverFactoryMock.Setup(x => x.GetDeckRetriever(It.IsAny<string>()))
+            .Returns(archidektServiceMock.Object);
+        archidektServiceMock.Setup(x => x.RetrieveDeckFromWeb(It.IsAny<string>()))
             .ReturnsAsync(new DeckDetailsDTO());
         _edhrecClientMock.Setup(x => x.GetDeck(It.IsAny<string>())).ReturnsAsync("""
             <html lang="en">
@@ -195,6 +199,53 @@ public class EdhrecServiceTests
                                                         <div class="flex-grow-1 shadow-sm w-100 card">
                                                             <div class="d-flex flex-column h-100 justify-content-between m-3">
                                                                 <div>Source: <a href="https://archidekt.com/decks/9146588?utm_source=edhrec&amp;utm_medium=deck_summary" rel="noopener noreferrer" target="_blank" title="Deck Source">archidekt.com</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>                 
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                </body> 
+            </html>
+            """);
+
+        // Act
+        var result = await _service.RetrieveDeckFromWeb(deckUrl);
+
+        // Assert
+        result.Should().NotBeNull();
+    }
+    
+    [Fact]
+    public async Task RetrieveDeckFromWeb_WithMoxfieldLink_GetDeckFromMoxfieldService()
+    {
+        // Arrange
+        string deckUrl = "https://edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA";
+        var moxfieldServiceMock = new Mock<IMoxfieldService>();
+        _deckRetrieverFactoryMock.Setup(x => x.GetDeckRetriever(It.IsAny<string>()))
+            .Returns(moxfieldServiceMock.Object);
+        moxfieldServiceMock.Setup(x => x.RetrieveDeckFromWeb(It.IsAny<string>()))
+            .ReturnsAsync(new DeckDetailsDTO());
+        _edhrecClientMock.Setup(x => x.GetDeck(It.IsAny<string>())).ReturnsAsync("""
+            <html lang="en">
+                <body>
+                    <div id="__next">
+                        <main class="Main_main__Kkd1U">
+                            <div class="d-flex flex-grow-1 p-3 pe-lg-0">
+                                <div class="d-flex w-100">
+                                    <div class="Main_left__B9nka">
+                                        <div class="Panels_container__jvZjo">
+                                            <div class="Panels_panels__t_RbF">
+                                                <div class="Panels_row__GFZm_">
+                                                    <div class="Panels_rowGroup__0xwUE Panels_right__stwAo">
+                                                        <div class="flex-grow-1 shadow-sm w-100 card">
+                                                            <div class="d-flex flex-column h-100 justify-content-between m-3">
+                                                                <div>Source: <a href="https://moxfield.com/decks/nZ2YLfU3J0KpYpsMsYHIRQ?utm_source=edhrec&amp;utm_medium=deck_summary" rel="noopener noreferrer" target="_blank" title="Deck Source">moxfield.com</a>
                                                             </div>
                                                         </div>
                                                     </div>
