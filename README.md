@@ -6,13 +6,13 @@ If so, then this application is for you! It allows you to generate a printable a
 
 ## Features
 
-- Download deck list straight from Archidekt via url 
+- Download deck list straight from deck-builder websites like Archidekt, Moxfield or EDHRec via URL 
+- Save cards resized and adjusted for printing in editable Word .docx format
 - Get deck list from exported file
 - Add cards number of times per number of quantity
 - Print dual side cards
 - Download cards from specified expansion and specific card version
 - Support art cards
-- Save cards resized and adjusted for printing in editable Word .docx format
 - Option to download all cards in specific language (cards not found in given language will be replaced with default english language)
 - Option to add related tokens from cards in the deck
 - Option to group tokens based on name and print only single copies of that card
@@ -22,18 +22,30 @@ If so, then this application is for you! It allows you to generate a printable a
 
 ## Plans
 
-- Support to other tools like Moxfield, EDHREC, MTGArena or MTGGoldfish
+- Support to other deck-builder websites
+- Add option to have square corners for all cards
 - Produce read-only PDF document instead of Word
-- Create Web version in ASP.NET API with Blazor
+- (Technical thing only) Create integration tests
+- Create Web version with Blazor
 - Host Web version via Github Pages
 - Build Web version via Github Actions
 
 ## Limitation
 
-- Download selected cards in specific language not supported (Archidekt does not support card language selection)
-- Custom cards are not supported (Archidekt does not support unofficial cards)
+### General
+
+- Custom cards are not supported (not implemented and not in plans for now)
 - Foil version of non unique card arts are not supported (Scryfall API that provide high quality foil card images except etched foil and unique foiled arts)
+
+### Archidekt
+
+- Download selected cards in specific language not supported (Archidekt does not support card language selection)
 - Import based on file exported from Archidekt does not support specific card version (missing *card number* information in exported file)
+
+### EDHRec
+
+- No support for specific version of cards (EDHRec does not provide API and their basic website does not specify what version of card is used)
+- Support only deckpreview pages for now
 
 ## Usage
 
