@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Domain.Clients;
 using Domain.Factories;
 using Domain.Models.DTO;
+using System.Net;
 
 namespace Domain.Services;
 
@@ -34,8 +35,7 @@ public class EdhrecService(IEdhrecClient edhrecClient, ILogger<EdhrecService> lo
             return null;
         }
 
-        // TODO Write html scrapper for EDHREC
-        var deck = new DeckDetailsDTO();
+        var deck = ScrapDeckFromHtml(deckHtml);
 
         return deck;
     }
@@ -55,5 +55,40 @@ public class EdhrecService(IEdhrecClient edhrecClient, ILogger<EdhrecService> lo
         }
 
         return false;
+    }
+    
+    private DeckDetailsDTO ScrapDeckFromHtml(string htmlContent)
+    {
+        // Match deck name
+        var deckNamePattern = "<h3.*?>(.*?)</h3>";
+        var deckNameMatch = Regex.Match(htmlContent, deckNamePattern);
+        string deckName = deckNameMatch.Success 
+            ? deckNameMatch.Groups[1].Value.Trim() 
+            : string.Empty;
+        var deck = new DeckDetailsDTO { Name = deckName };
+    
+        // Match card entries in a URL
+        string cardListPattern = @"(\d+\+[^&]+)";
+        var matches = Regex.Matches(htmlContent, cardListPattern);
+
+        foreach (Match match in matches)
+        {
+            if (match.Success)
+            {
+                string encodedCard = match.Groups[1].Value;
+                string decodedCard = Uri.UnescapeDataString(encodedCard).Replace("+", " ");
+
+                // Match card quantity and name
+                var cardMatch = Regex.Match(decodedCard, @"(\d+)\s+(.+)");
+                if (cardMatch.Success)
+                {
+                    int quantity = int.Parse(cardMatch.Groups[1].Value);
+                    string name = cardMatch.Groups[2].Value.Trim(); // Trim to remove unwanted characters
+                    deck.Cards.Add(new CardEntryDTO { Quantity = quantity, Name = name });
+                }
+            }
+        }
+    
+        return deck;
     }
 }
