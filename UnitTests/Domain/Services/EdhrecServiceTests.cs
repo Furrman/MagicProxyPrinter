@@ -165,6 +165,7 @@ public class EdhrecServiceTests
         result.Should().NotBeNull();
         result!.Cards[0].Should().NotBeNull();
         result.Cards[0].Name.Should().Be("Arena Rector");
-        result.Cards[0].Quantity.Should().Be(2);
+        // Quantity in EDHRec should always be 1
+        result.Cards[0].Quantity.Should().Be(1);
     }
 }

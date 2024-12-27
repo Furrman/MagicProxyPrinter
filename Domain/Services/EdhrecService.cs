@@ -1,10 +1,12 @@
-using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
+using System.Text.RegularExpressions;
+using System.Web;
+
+using HtmlAgilityPack;
 
 using Domain.Clients;
 using Domain.Factories;
 using Domain.Models.DTO;
-using System.Net;
 
 namespace Domain.Services;
 
@@ -59,36 +61,30 @@ public class EdhrecService(IEdhrecClient edhrecClient, ILogger<EdhrecService> lo
     
     private DeckDetailsDTO ScrapDeckFromHtml(string htmlContent)
     {
-        // Match deck name
-        var deckNamePattern = "<h3.*?>(.*?)</h3>";
-        var deckNameMatch = Regex.Match(htmlContent, deckNamePattern);
-        string deckName = deckNameMatch.Success 
-            ? deckNameMatch.Groups[1].Value.Trim() 
-            : string.Empty;
-        var deck = new DeckDetailsDTO { Name = deckName };
-    
-        // Match card entries in a URL
-        string cardListPattern = @"(\d+\+[^&]+)";
-        var matches = Regex.Matches(htmlContent, cardListPattern);
-
-        foreach (Match match in matches)
+        var deck = new DeckDetailsDTO();
+        
+        var htmlDoc = new HtmlDocument();
+        htmlDoc.LoadHtml(htmlContent);
+        
+        // Get the deck name
+        var deckNameNode = htmlDoc.DocumentNode.SelectSingleNode("//h3[contains(text(), 'Deck with')]");
+        if (deckNameNode != null)
         {
-            if (match.Success)
-            {
-                string encodedCard = match.Groups[1].Value;
-                string decodedCard = Uri.UnescapeDataString(encodedCard).Replace("+", " ");
-
-                // Match card quantity and name
-                var cardMatch = Regex.Match(decodedCard, @"(\d+)\s+(.+)");
-                if (cardMatch.Success)
-                {
-                    int quantity = int.Parse(cardMatch.Groups[1].Value);
-                    string name = cardMatch.Groups[2].Value.Trim(); // Trim to remove unwanted characters
-                    deck.Cards.Add(new CardEntryDTO { Quantity = quantity, Name = name });
-                }
-            }
+            deck.Name = HttpUtility.HtmlDecode(deckNameNode.InnerText.Trim());
         }
     
+        // Get card entries
+        var nodes = htmlDoc.DocumentNode.SelectNodes("//span[contains(@class, 'Card_name__')]");
+        if (nodes != null)
+        {
+            foreach (var node in nodes)
+            {
+                string decodedName = HttpUtility.HtmlDecode(node.InnerText.Trim());
+                deck.Cards.Add(new CardEntryDTO { Name = decodedName, Quantity = 1 });
+                Console.WriteLine(decodedName);
+            }
+        }
+        
         return deck;
     }
 }
