@@ -13,6 +13,7 @@ If so, then this application is for you! It allows you to generate a printable a
 - Print dual side cards
 - Download cards from specified expansion and specific card version
 - Support art cards
+- Save cards resized and adjusted for printing in editable Word .docx format
 - Option to download all cards in specific language (cards not found in given language will be replaced with default english language)
 - Option to add related tokens from cards in the deck
 - Option to group tokens based on name and print only single copies of that card
@@ -61,8 +62,8 @@ Usage: MagicProxyPrint [--deck-file-path <String>] [--deck-url <String>] [--lang
 MagicProxyPrinter
 
 Options:
-  --deck-file-path <String>      Filepath to exported deck from Archidekt
-  --deck-url <String>            URL link to deck in Archidekt
+  --deck-file-path <String>      Filepath to exported deck
+  --deck-url <String>            URL link to deck
   --language-code <String>       Set language for all cards to print
   --token-copies <Int32>         Number of copy for each token
   --group-tokens                 Group tokens based on the name
