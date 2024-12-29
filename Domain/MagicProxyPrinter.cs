@@ -2,6 +2,7 @@
 using Domain.IO;
 using Domain.Models.Events;
 using Domain.Services;
+using Domain.Strategies;
 
 namespace Domain;
 
@@ -62,20 +63,20 @@ public class MagicProxyPrinter : IMagicProxyPrinter
 {
     public event EventHandler<UpdateProgressEventArgs>? ProgressUpdate;
 
-    private readonly IDeckRetrieverFactory _deckRetrieverFactory;
+    private readonly IDeckRetrieveStrategy _deckRetrieveStrategy;
     private readonly IScryfallService _scryfallService;
     private readonly ICardListFileParser _fileParser;
     private readonly IFileManager _fileManager;
     private readonly IWordGeneratorService _wordGeneratorService;
 
     public MagicProxyPrinter(
-        IDeckRetrieverFactory deckRetrieverFactory,
+        IDeckRetrieveStrategy deckRetrieveStrategy,
         IScryfallService scryfallService,
         ICardListFileParser fileParser,
         IFileManager fileManager,
         IWordGeneratorService wordGeneratorService)
     {
-        _deckRetrieverFactory = deckRetrieverFactory;
+        _deckRetrieveStrategy = deckRetrieveStrategy;
         _scryfallService = scryfallService;
         _fileParser = fileParser;
         _fileManager = fileManager;
@@ -109,13 +110,7 @@ public class MagicProxyPrinter : IMagicProxyPrinter
         bool groupTokens = false,
         bool saveImages = false)
     {
-        var deckRetriever = _deckRetrieverFactory.GetDeckRetriever(deckUrl);
-        if (deckRetriever is null)
-        {
-            RaiseError("Not able to find deck online");
-            return;
-        }
-        var deck = await deckRetriever.RetrieveDeckFromWeb(deckUrl);
+        var deck = await _deckRetrieveStrategy.GetDeck(deckUrl);
         if (deck is null)
         {
             RaiseError("Getting deck details returned error");
@@ -143,11 +138,6 @@ public class MagicProxyPrinter : IMagicProxyPrinter
         }
 
         var deck = _fileParser.GetDeckFromFile(deckListFilePath);
-        if (deck is null)
-        {
-            RaiseError("Error in parsing deck list file");
-            return;
-        }
 
         await _scryfallService.UpdateCardImageLinks(deck.Cards, languageCode, tokenCopies, groupTokens);
 

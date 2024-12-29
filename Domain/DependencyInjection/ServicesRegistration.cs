@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-using Domain.Clients;
 using Domain.Factories;
 using Domain.IO;
 using Domain.Services;
+using Domain.Strategies;
 
 namespace Domain.DependencyInjection;
 
@@ -15,13 +15,16 @@ public static class ServicesRegistration
             // Facades
             .AddScoped<IMagicProxyPrinter, MagicProxyPrinter>()
             // Factories
-            .AddScoped<IDeckRetrieverFactory, DeckRetrieverFactory>()
+            .AddScoped<IServiceFactory, ServiceFactory>()
+            // Strategies
+            .AddScoped<IDeckRetrieveStrategy, DeckRetrieveStrategy>()
             // IO
             .AddScoped<ICardListFileParser, CardListFileParser>()
             .AddScoped<IFileManager, FileManager>()
             .AddScoped<IWordDocumentWrapper, WordDocumentWrapper>()
             // Services
             .AddScoped<IArchidektService, ArchidektService>()
+            .AddScoped<IEdhrecService, EdhrecService>()
             .AddScoped<IMoxfieldService, MoxfieldService>()
             .AddScoped<IScryfallService, ScryfallService>()
             .AddScoped<ILanguageService, LanguageService>()
