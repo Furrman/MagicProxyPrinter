@@ -3,6 +3,7 @@
 using Domain.Factories;
 using Domain.IO;
 using Domain.Services;
+using Domain.Strategies;
 
 namespace Domain.DependencyInjection;
 
@@ -14,7 +15,9 @@ public static class ServicesRegistration
             // Facades
             .AddScoped<IMagicProxyPrinter, MagicProxyPrinter>()
             // Factories
-            .AddScoped<IDeckRetrieverFactory, DeckRetrieverFactory>()
+            .AddScoped<IServiceFactory, ServiceFactory>()
+            // Strategies
+            .AddScoped<IDeckRetrieveStrategy, DeckRetrieveStrategy>()
             // IO
             .AddScoped<ICardListFileParser, CardListFileParser>()
             .AddScoped<IFileManager, FileManager>()

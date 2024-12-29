@@ -10,8 +10,22 @@ using Domain.Models.DTO;
 
 namespace Domain.Services;
 
-public interface IEdhrecService : IDeckRetriever
+public interface IEdhrecService : IDeckBuildService
 {
+    /// <summary>
+    /// Get the link to original link in other service if available.
+    /// </summary>
+    /// <param name="deckUrl">The URL to extract the deck ID from.</param>
+    /// <returns>Link to original deck in other service than EDHRec or null if not.</returns>
+    Task<(string?, string?)> GetOriginalDeckLink(string deckUrl);
+
+    /// <summary>
+    /// Scrap HTML with deck and retrieve all deck information
+    /// </summary>
+    /// <param name="htmlContent">HTML code retrieved from website from deck.</param>
+    /// <returns>Deck object with deck details and cards.</returns>
+    DeckDetailsDTO ScrapDeckFromHtml(string htmlContent);
+    
     /// <summary>
     /// Tries to extract the deck ID from the given URL.
     /// </summary>
@@ -22,11 +36,9 @@ public interface IEdhrecService : IDeckRetriever
 }
 
 public class EdhrecService(IEdhrecClient edhrecClient,
-    IDeckRetrieverFactory deckRetrieverFactory,
     ILogger<EdhrecService> logger) : IEdhrecService
 {
     private readonly IEdhrecClient _edhrecClient = edhrecClient;
-    private readonly IDeckRetrieverFactory _deckRetrieverFactory = deckRetrieverFactory;
     private readonly ILogger<EdhrecService> _logger = logger;
 
     public async Task<DeckDetailsDTO?> RetrieveDeckFromWeb(string deckUrl)
@@ -40,11 +52,36 @@ public class EdhrecService(IEdhrecClient edhrecClient,
             return null;
         }
 
-        var deck = await ScrapDeckFromHtml(deckHtml);
+        var deck = ScrapDeckFromHtml(deckHtml);
 
         return deck;
     }
-    
+
+    public async Task<(string?, string?)> GetOriginalDeckLink(string deckUrl)
+    {
+        TryExtractDeckIdFromUrl(deckUrl, out string deckId);
+        
+        var htmlContent = await _edhrecClient.GetDeck(deckId);
+        if (htmlContent is null)
+        {
+            _logger.LogError("Deck not loaded from internet");
+            return (null, null);
+        }
+        
+        var htmlDoc = new HtmlDocument();
+        htmlDoc.LoadHtml(htmlContent);
+        
+        var sourceLinkNode = htmlDoc.DocumentNode.SelectSingleNode("//div[contains(text(), 'Source:')]/a");
+        if (sourceLinkNode != null)
+        {
+            string link = sourceLinkNode.GetAttributeValue("href", string.Empty);
+            link = HttpUtility.HtmlDecode(link);
+            return (link, htmlContent);
+        }
+
+        return (null, htmlContent);
+    }
+
     public bool TryExtractDeckIdFromUrl(string url, out string deckId)
     {
         deckId = string.Empty;
@@ -62,23 +99,10 @@ public class EdhrecService(IEdhrecClient edhrecClient,
         return false;
     }
     
-    private async Task<DeckDetailsDTO?> ScrapDeckFromHtml(string htmlContent)
+    public DeckDetailsDTO ScrapDeckFromHtml(string htmlContent)
     {
         var htmlDoc = new HtmlDocument();
         htmlDoc.LoadHtml(htmlContent);
-        
-        // Get Archidekt link to deck if it is available and retrieve deck from it instead
-        var sourceLinkNode = htmlDoc.DocumentNode.SelectSingleNode("//div[contains(text(), 'Source:')]/a");
-        if (sourceLinkNode != null)
-        {
-            string link = sourceLinkNode.GetAttributeValue("href", string.Empty);
-            link = HttpUtility.HtmlDecode(link);
-            var service = _deckRetrieverFactory.GetDeckRetriever(link);
-            if (service is not null)
-            {
-                return await service.RetrieveDeckFromWeb(link);
-            }
-        }
         
         // Get the deck name
         var deck = new DeckDetailsDTO();
@@ -100,5 +124,20 @@ public class EdhrecService(IEdhrecClient edhrecClient,
         }
 
         return deck;
+    }
+
+
+    private async Task<string?> GetDeckHtmlContent(string deckUrl)
+    {
+        TryExtractDeckIdFromUrl(deckUrl, out string deckId);
+        
+        var htmlContent = await _edhrecClient.GetDeck(deckId);
+        if (htmlContent is null)
+        {
+            _logger.LogError("Deck not loaded from internet");
+            return null;
+        }
+
+        return htmlContent;
     }
 }

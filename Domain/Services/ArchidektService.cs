@@ -11,7 +11,7 @@ namespace Domain.Services;
 /// <summary>
 /// Represents a service for interacting with Archidekt.
 /// </summary>
-public interface IArchidektService : IDeckRetriever
+public interface IArchidektService : IDeckBuildService
 {
     /// <summary>
     /// Tries to extract the deck ID from the given URL.
@@ -53,6 +53,7 @@ public class ArchidektService(IArchidektClient archidektApiClient, ILogger<Archi
     public bool TryExtractDeckIdFromUrl(string url, out int deckId)
     {
         deckId = 0;
+        
         string pattern = @"^https:\/\/(www\.)?archidekt\.com\/(?:api\/decks\/(\d+)\/|decks\/(\d+)\/?)";
         Regex regex = new(pattern);
 

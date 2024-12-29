@@ -7,7 +7,7 @@ using Domain.Models.DTO;
 
 namespace Domain.Services;
 
-public interface IMoxfieldService : IDeckRetriever
+public interface IMoxfieldService : IDeckBuildService
 {
     /// <summary>
     /// Tries to extract the deck ID from the given URL.
@@ -53,15 +53,14 @@ public class MoxfieldService(IMoxfieldClient moxfieldClient, ILogger<MoxfieldSer
     public bool TryExtractDeckIdFromUrl(string url, out string deckId)
     {
         deckId = string.Empty;
-        string pattern = @"^https:\/\/(www\.)?moxfield\.com\/decks\/([\w\-._~]+)\/?$";
+        string pattern = @"^https:\/\/(www\.)?moxfield\.com\/decks\/([\w\-._~]+)(\/|(\?.*)?)$";
         Regex regex = new(pattern);
 
         Match match = regex.Match(url);
         if (match.Success)
         {
-            var index = match.Groups.Count;
-            deckId = match.Groups[index - 1].Value;
-            if (deckId != string.Empty) return true;
+            deckId = match.Groups[2].Value;
+            return true;
         }
 
         return false;

@@ -13,17 +13,14 @@ namespace UnitTests.Domain.Services;
 public class EdhrecServiceTests
 {
     private readonly Mock<IEdhrecClient> _edhrecClientMock;
-    private readonly Mock<IDeckRetrieverFactory> _deckRetrieverFactoryMock;
     private readonly Mock<ILogger<EdhrecService>> _loggerMock;
     private readonly EdhrecService _service;
 
     public EdhrecServiceTests()
     {
         _edhrecClientMock = new Mock<IEdhrecClient>();
-        _deckRetrieverFactoryMock = new Mock<IDeckRetrieverFactory>();
         _loggerMock = new Mock<ILogger<EdhrecService>>();
         _service = new EdhrecService(_edhrecClientMock.Object, 
-            _deckRetrieverFactoryMock.Object,
             _loggerMock.Object);
     }
 
@@ -175,15 +172,10 @@ public class EdhrecServiceTests
     }
     
     [Fact]
-    public async Task RetrieveDeckFromWeb_WithArchidektLink_GetDeckFromArchidektService()
+    public async Task GetOriginalDeckLink_WithArchidektLink_GetDeckFromArchidektService()
     {
         // Arrange
         string deckUrl = "https://edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA";
-        var archidektServiceMock = new Mock<IArchidektService>();
-        _deckRetrieverFactoryMock.Setup(x => x.GetDeckRetriever(It.IsAny<string>()))
-            .Returns(archidektServiceMock.Object);
-        archidektServiceMock.Setup(x => x.RetrieveDeckFromWeb(It.IsAny<string>()))
-            .ReturnsAsync(new DeckDetailsDTO());
         _edhrecClientMock.Setup(x => x.GetDeck(It.IsAny<string>())).ReturnsAsync("""
             <html lang="en">
                 <body>
@@ -215,22 +207,18 @@ public class EdhrecServiceTests
             """);
 
         // Act
-        var result = await _service.RetrieveDeckFromWeb(deckUrl);
+        var (link, html) = await _service.GetOriginalDeckLink(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
+        link.Should().NotBeNull();
+        link.Should().Be("https://archidekt.com/decks/9146588?utm_source=edhrec&utm_medium=deck_summary");
     }
     
     [Fact]
-    public async Task RetrieveDeckFromWeb_WithMoxfieldLink_GetDeckFromMoxfieldService()
+    public async Task GetOriginalDeckLink_WithMoxfieldLink_GetDeckFromMoxfieldService()
     {
         // Arrange
         string deckUrl = "https://edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA";
-        var moxfieldServiceMock = new Mock<IMoxfieldService>();
-        _deckRetrieverFactoryMock.Setup(x => x.GetDeckRetriever(It.IsAny<string>()))
-            .Returns(moxfieldServiceMock.Object);
-        moxfieldServiceMock.Setup(x => x.RetrieveDeckFromWeb(It.IsAny<string>()))
-            .ReturnsAsync(new DeckDetailsDTO());
         _edhrecClientMock.Setup(x => x.GetDeck(It.IsAny<string>())).ReturnsAsync("""
             <html lang="en">
                 <body>
@@ -262,9 +250,10 @@ public class EdhrecServiceTests
             """);
 
         // Act
-        var result = await _service.RetrieveDeckFromWeb(deckUrl);
+        var (link, html) = await _service.GetOriginalDeckLink(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
+        link.Should().NotBeNull();
+        link.Should().Be("https://moxfield.com/decks/nZ2YLfU3J0KpYpsMsYHIRQ?utm_source=edhrec&utm_medium=deck_summary");
     }
 }
