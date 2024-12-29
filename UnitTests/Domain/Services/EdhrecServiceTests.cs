@@ -25,8 +25,10 @@ public class EdhrecServiceTests
     }
 
     [Theory]
-    [InlineData("https://www.edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA", "7VNuM_Ce5b3JbQrhfTsObA")]
-    [InlineData("https://edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA", "7VNuM_Ce5b3JbQrhfTsObA")]
+    [InlineData("https://www.edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA", "deckpreview/7VNuM_Ce5b3JbQrhfTsObA")]
+    [InlineData("https://www.edhrec.com/commanders/7VNuM_Ce5b3JbQrhfTsObA", "commanders/7VNuM_Ce5b3JbQrhfTsObA")]
+    [InlineData("https://edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA", "deckpreview/7VNuM_Ce5b3JbQrhfTsObA")]
+    [InlineData("https://edhrec.com/commanders/7VNuM_Ce5b3JbQrhfTsObA", "commanders/7VNuM_Ce5b3JbQrhfTsObA")]
     public void TryExtractRelativePath_ValidUrl_ReturnsTrueAndExtractedDeckId(string url, string expectedDeckId)
     {
         // Act
@@ -38,6 +40,8 @@ public class EdhrecServiceTests
     }
 
     [Theory]
+    [InlineData("https://edhrec.com/commanders")]
+    [InlineData("https://edhrec.com/commanders/")]
     [InlineData("https://edhrec.com/deckpreview")]
     [InlineData("https://edhrec.com/deckpreview/")]
     [InlineData("https://edhrec.com/")]
