@@ -44,8 +44,8 @@ If so, then this application is for you! It allows you to generate a printable a
 
 ### EDHRec
 
-- No support for specific version of cards (EDHRec does not provide API and their basic website does not specify what version of card is used)
-- Support only deckpreview pages for now
+- Works only for the following relative paths: /deckpreview and /commanders (the only places that contains some cards)
+- No support for specific version of cards for edhrec.com/commanders (EDHRec does not provide API and their basic website does not specify what version of card is used)
 
 ## Usage
 
