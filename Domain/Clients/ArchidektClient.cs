@@ -26,7 +26,7 @@ public class ArchidektClient(HttpClient httpClient, ILogger<ArchidektClient> log
     public async Task<DeckDTO?> GetDeck(int deckId)
     {
         DeckDTO? deckDto = null;
-        var requestUrl = $"api/decks/{deckId}/";
+        var requestUrl = $"decks/{deckId}/";
         HttpResponseMessage response;
         try
         {

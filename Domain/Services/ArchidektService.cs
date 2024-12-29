@@ -86,6 +86,7 @@ public class ArchidektService(IArchidektClient archidektApiClient, ILogger<Archi
 
             deckCards.Add(new CardEntryDTO
             {
+                Id = card.Card?.UID,
                 Name = cardName,
                 Quantity = card.Quantity,
                 CollectorNumber = card.Card?.CollectorNumber,
