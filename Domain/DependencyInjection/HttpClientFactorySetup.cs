@@ -14,7 +14,7 @@ public static class HttpClientFactorySetup
     {
         services.AddHttpClient<IArchidektClient, ArchidektClient>(client =>
         {
-            client.BaseAddress = new Uri("https://archidekt.com/");
+            client.BaseAddress = new Uri("https://archidekt.com/api/");
             client.Timeout = TimeSpan.FromSeconds(30);
         }).AddPolicyHandler(GetRetryPolicy());
         services.AddHttpClient<IMoxfieldClient, MoxfieldClient>(client =>

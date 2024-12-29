@@ -18,8 +18,8 @@ internal class Program
     {
         var serviceProvider = DependencyInjectionConfigurator.Setup();
 
-        CoconoaApp.Run(([CoconoaOptions(Description = "Filepath to exported deck from Archidekt")] string? deckFilePath,
-            [CoconoaOptions(Description = "URL link to deck in Archidekt")]string? deckUrl,
+        CoconoaApp.Run(([CoconoaOptions(Description = "Filepath to exported deck")] string? deckFilePath,
+            [CoconoaOptions(Description = "URL link to deck")]string? deckUrl,
             [CoconoaOptions(Description = "Set language for all cards to print")] string? languageCode = null,
             [CoconoaOptions(Description = "Number of copy for each token")] int? tokenCopies = null,
             [CoconoaOptions(Description = "Group tokens based on the name")] bool groupTokens = false,

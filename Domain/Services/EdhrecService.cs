@@ -16,7 +16,8 @@ public interface IEdhrecService : IDeckBuildService
     /// Get the link to original link in other service if available.
     /// </summary>
     /// <param name="deckUrl">The URL to extract the deck ID from.</param>
-    /// <returns>Link to original deck in other service than EDHRec or null if not.</returns>
+    /// <returns>First parameter is a link to original deck in other service than EDHRec or null if not.
+    /// The second one is html code with deck data retrieved from GET request.</returns>
     Task<(string?, string?)> GetOriginalDeckLink(string deckUrl);
 
     /// <summary>
@@ -27,12 +28,12 @@ public interface IEdhrecService : IDeckBuildService
     DeckDetailsDTO ScrapDeckFromHtml(string htmlContent);
     
     /// <summary>
-    /// Tries to extract the deck ID from the given URL.
+    /// Tries to extract matching relative path from the given URL.
     /// </summary>
     /// <param name="url">The URL to extract the deck ID from.</param>
-    /// <param name="deckId">The extracted deck ID, if successful.</param>
+    /// <param name="deckId">Relative path of URL, if successful.</param>
     /// <returns><c>true</c> if the deck ID was successfully extracted; otherwise, <c>false</c>.</returns>
-    bool TryExtractDeckIdFromUrl(string url, out string deckId);
+    bool TryExtractRelativePath(string url, out string deckId);
 }
 
 public class EdhrecService(IEdhrecClient edhrecClient,
@@ -43,25 +44,21 @@ public class EdhrecService(IEdhrecClient edhrecClient,
 
     public async Task<DeckDetailsDTO?> RetrieveDeckFromWeb(string deckUrl)
     {
-        TryExtractDeckIdFromUrl(deckUrl, out string deckId);
-        
-        var deckHtml = await _edhrecClient.GetDeck(deckId);
-        if (deckHtml is null)
+        var htmlContent = await GetDeckHtmlContent(deckUrl);
+        if (htmlContent is null)
         {
             _logger.LogError("Deck not loaded from internet");
             return null;
         }
 
-        var deck = ScrapDeckFromHtml(deckHtml);
+        var deck = ScrapDeckFromHtml(htmlContent);
 
         return deck;
     }
 
     public async Task<(string?, string?)> GetOriginalDeckLink(string deckUrl)
     {
-        TryExtractDeckIdFromUrl(deckUrl, out string deckId);
-        
-        var htmlContent = await _edhrecClient.GetDeck(deckId);
+        var htmlContent = await GetDeckHtmlContent(deckUrl);
         if (htmlContent is null)
         {
             _logger.LogError("Deck not loaded from internet");
@@ -81,23 +78,6 @@ public class EdhrecService(IEdhrecClient edhrecClient,
 
         return (null, htmlContent);
     }
-
-    public bool TryExtractDeckIdFromUrl(string url, out string deckId)
-    {
-        deckId = string.Empty;
-        string pattern = @"^https:\/\/(www\.)?edhrec\.com\/deckpreview\/([\w\-._~]+)\/?$";
-        Regex regex = new(pattern);
-
-        Match match = regex.Match(url);
-        if (match.Success)
-        {
-            var index = match.Groups.Count;
-            deckId = match.Groups[index - 1].Value;
-            if (deckId != string.Empty) return true;
-        }
-
-        return false;
-    }
     
     public DeckDetailsDTO ScrapDeckFromHtml(string htmlContent)
     {
@@ -111,7 +91,15 @@ public class EdhrecService(IEdhrecClient edhrecClient,
         {
             deck.Name = HttpUtility.HtmlDecode(deckNameNode.InnerText.Trim());
         }
-    
+        else
+        {
+            deckNameNode = htmlDoc.DocumentNode.SelectSingleNode("//div[contains(@class, 'CoolHeader_container__MASgl')]/h3");
+            if (deckNameNode != null)
+            {
+                deck.Name = HttpUtility.HtmlDecode(deckNameNode.InnerText.Trim());
+            }
+        }
+        
         // Get card entries
         var nodes = htmlDoc.DocumentNode.SelectNodes("//span[contains(@class, 'Card_name__')]");
         if (nodes != null)
@@ -126,12 +114,29 @@ public class EdhrecService(IEdhrecClient edhrecClient,
         return deck;
     }
 
+    public bool TryExtractRelativePath(string url, out string relativePath)
+    {
+        relativePath = string.Empty;
+
+        string pattern = @"^https://(www\.)?edhrec\.com/(?<relativePath>(commanders|deckpreview)/.+)$";
+        Regex regex = new(pattern);
+
+        Match match = regex.Match(url);
+        if (match.Success)
+        {
+            relativePath = match.Groups["relativePath"].Value;
+            return true;
+        }
+
+        return false;
+    }
+
 
     private async Task<string?> GetDeckHtmlContent(string deckUrl)
     {
-        TryExtractDeckIdFromUrl(deckUrl, out string deckId);
+        TryExtractRelativePath(deckUrl, out string relativePath);
         
-        var htmlContent = await _edhrecClient.GetDeck(deckId);
+        var htmlContent = await _edhrecClient.GetCardsInHtml(relativePath);
         if (htmlContent is null)
         {
             _logger.LogError("Deck not loaded from internet");
