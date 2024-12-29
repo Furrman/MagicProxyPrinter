@@ -9,7 +9,9 @@
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-    <Version>2.2.1</Version>
+    <Version>$(GitTagVersion)</Version>
+    <FileVersion>$(GitTagVersion)</FileVersion>
+    <AssemblyVersion>$(GitTagVersion)</AssemblyVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 

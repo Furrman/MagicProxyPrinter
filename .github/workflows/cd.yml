@@ -43,9 +43,10 @@ jobs:
         run: |
           tag=$(git describe --tags --abbrev=0)
           release_name="MagicProxyPrinter-$tag-${{ matrix.target }}"
+          version=$(echo $tag | sed -E 's/^v\.?(([0-9]+\.){0,3}[0-9]+).*/\1/')
 
           # Build everything
-          dotnet publish ConsoleApp/ConsoleApp.csproj --runtime "${{ matrix.target }}" -c Release -o "$release_name"
+          dotnet publish ConsoleApp/ConsoleApp.csproj --runtime "${{ matrix.target }}" -p:GitTagVersion=$version -c Release -o "$release_name"
 
           # Pack files
           if [ "${{ matrix.target }}" == "win-x64" ]; then
