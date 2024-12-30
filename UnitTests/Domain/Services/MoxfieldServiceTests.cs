@@ -23,16 +23,18 @@ public class MoxfieldServiceTests
     }
 
     [Theory]
+    [InlineData("moxfield.com/decks/123fdgd/", "123fdgd")]
+    [InlineData("www.moxfield.com/decks/123fdgd/", "123fdgd")]
     [InlineData("https://moxfield.com/decks/123fdgd/", "123fdgd")]
     [InlineData("https://www.moxfield.com/decks/123fdgd/", "123fdgd")]
-    public void TryExtractDeckIdFromUrl_ValidUrl_ReturnsTrueAndExtractedDeckId(string url, string expectedDeckId)
+    public void TryExtractDeckIdFromUrl_ValidUrl_ReturnsTrueAndExtractedRelatedPath(string url, string expectedId)
     {
         // Act
         bool result = _service.TryExtractDeckIdFromUrl(url, out string deckId);
 
         // Assert
         result.Should().BeTrue();
-        deckId.Should().Be(expectedDeckId);
+        deckId.Should().Be(expectedId);
     }
 
     [Theory]
@@ -42,11 +44,11 @@ public class MoxfieldServiceTests
     public void TryExtractDeckIdFromUrl_InvalidUrl_ReturnsFalse(string url)
     {
         // Act
-        bool result = _service.TryExtractDeckIdFromUrl(url, out string deckId);
+        bool result = _service.TryExtractDeckIdFromUrl(url, out string relatedPath);
 
         // Assert
         result.Should().BeFalse();
-        deckId.Should().Be(string.Empty);
+        relatedPath.Should().Be(string.Empty);
     }
 
     [Fact]
