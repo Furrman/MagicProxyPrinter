@@ -42,6 +42,7 @@ public class ServiceFactory(IServiceProvider serviceProvider) : IServiceFactory
         {
             DeckBuilders.ARCHIDEKT_URL_DOMAIN => _serviceProvider.GetService<IArchidektService>(),
             DeckBuilders.EDHREC_URL_DOMAIN => _serviceProvider.GetService<IEdhrecService>(),
+            DeckBuilders.GOLDFISH_URL_DOMAIN => _serviceProvider.GetService<IGoldfishService>(),
             DeckBuilders.MOXFIELD_URL_DOMAIN => _serviceProvider.GetService<IMoxfieldService>(),
             _ => null
         };
@@ -51,8 +52,14 @@ public class ServiceFactory(IServiceProvider serviceProvider) : IServiceFactory
     {
         try
         {
-            var uri = new Uri(url);
-            return uri.Host.ToLowerInvariant();
+            Uri uri = new(url);
+            string host = uri.Host.ToLowerInvariant();
+            if (host.StartsWith("www."))
+            {
+                host = host[4..];
+            }
+
+            return host;
         }
         catch
         {

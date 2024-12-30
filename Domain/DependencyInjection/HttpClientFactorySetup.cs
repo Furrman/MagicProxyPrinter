@@ -29,6 +29,12 @@ public static class HttpClientFactorySetup
             client.Timeout = TimeSpan.FromSeconds(30);
             client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter");
         }).AddPolicyHandler(GetRetryPolicy());
+        services.AddHttpClient<IGoldfishClient, GoldfishClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://mtggoldfish.com/");
+            client.Timeout = TimeSpan.FromSeconds(30);
+            client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter");
+        }).AddPolicyHandler(GetRetryPolicy());
         services.AddHttpClient<IScryfallClient, ScryfallClient>(client =>
         {
             client.BaseAddress = new Uri("https://api.scryfall.com/");
