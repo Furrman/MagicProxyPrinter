@@ -26,10 +26,11 @@ public interface IMagicProxyPrinter
     /// <param name="languageCode">The language code to be used for generating the Word document. If null, the default language code will be used.</param>
     /// <param name="tokenCopies">Number of copies for each token added to document. Default is 0.</param>
     /// <param name="groupTokens">Group tokens based on the name. Default is false.</param>
+    /// <param name="includeEmblems">Include emblems to documents. Default is false.</param>
     /// <param name="saveImages">Specifies whether to save card images in the document. Default is false.</param>
     /// <returns>A task representing the asynchronous generation process.</returns>
     Task GenerateWord(string? deckUrl = null, string? inputFilePath = null, string? outputDirPath = null, string? outputFileName = null, 
-        string? languageCode = null, int tokenCopies = 0, bool groupTokens = false, bool saveImages = false);
+        string? languageCode = null, int tokenCopies = 0, bool groupTokens = false, bool includeEmblems = false, bool saveImages = false);
 
     /// <summary>
     /// Generates a Word document from the specified deck ID stored in the internet.
@@ -40,10 +41,11 @@ public interface IMagicProxyPrinter
     /// <param name="languageCode">The language code to be used for generating the Word document. If null, the default language code will be used.</param>
     /// <param name="tokenCopies">Number of copies for each token added to document. Default is 0.</param>
     /// <param name="groupTokens">Group tokens based on the name. Default is false.</param>
+    /// <param name="includeEmblems">Include emblems to documents. Default is false.</param>
     /// <param name="saveImages">Specifies whether to save card images in the document. Default is false.</param>
     /// <returns>A task representing the asynchronous generation process.</returns>
     Task GenerateWordFromDeckOnline(string deckUrl, string? outputDirPath = null, string? outputFileName = null, 
-        string? languageCode = null, int tokenCopies = 0, bool groupTokens = false, bool saveImages = false);
+        string? languageCode = null, int tokenCopies = 0, bool groupTokens = false, bool includeEmblems = false, bool saveImages = false);
 
     /// <summary>
     /// Generates a Word document from the specified deck list file.
@@ -54,9 +56,10 @@ public interface IMagicProxyPrinter
     /// <param name="tokenCopies">Number of copies for each token added to document. Default is 0.</param>
     /// <param name="groupTokens">Group tokens based on the name. Default is false.</param>
     /// <param name="saveImages">Specifies whether to save card images in the document. Default is false.</param>
+    /// <param name="includeEmblems">Include emblems to documents. Default is false.</param>
     /// <returns>A task representing the asynchronous generation process.</returns>
     Task GenerateWordFromDeckInFile(string deckListFilePath, string? outputDirPath = null, string? outputFileName = null, 
-        string? languageCode = null, int tokenCopies = 0, bool groupTokens = false, bool saveImages = false);
+        string? languageCode = null, int tokenCopies = 0, bool groupTokens = false, bool includeEmblems = false, bool saveImages = false);
 }
 
 public class MagicProxyPrinter : IMagicProxyPrinter
@@ -94,6 +97,7 @@ public class MagicProxyPrinter : IMagicProxyPrinter
         string? languageCode = null,
         int tokenCopies = 0, 
         bool groupTokens = false,
+        bool includeEmblems = false,
         bool saveImages = false)
     {
         if (deckUrl != null) await GenerateWordFromDeckOnline(deckUrl, outputDirPath, outputFileName, languageCode, tokenCopies, groupTokens, saveImages);
@@ -108,6 +112,7 @@ public class MagicProxyPrinter : IMagicProxyPrinter
         string? languageCode = null,
         int tokenCopies = 0, 
         bool groupTokens = false,
+        bool includeEmblems = false,
         bool saveImages = false)
     {
         var deck = await _deckRetrieveStrategy.GetDeck(deckUrl);
@@ -129,6 +134,7 @@ public class MagicProxyPrinter : IMagicProxyPrinter
         string? languageCode = null,
         int tokenCopies = 0, 
         bool groupTokens = false,
+        bool includeEmblems = false,
         bool saveImages = false)
     {
         if (!_fileManager.FileExists(deckListFilePath))
