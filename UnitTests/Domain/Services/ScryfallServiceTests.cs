@@ -97,10 +97,10 @@ public class ScryfallServiceTests
         ];
 
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
-            .ReturnsAsync(new CardSearchDTO(
-                [
-                    new CardDataDTO { Name = "Card 1", ImageUriData = new CardImageUriDTO("https://example.com/card1.jpg")}
-                ]));
+            .ReturnsAsync(new CardSearchDTO()
+                {
+                    Data = [new CardDataDTO { Name = "Card 1", ImageUriData = new CardImageUriDTO() { Large = "https://example.com/card1.jpg" }}]
+                });
 
         // Act
         await _service.UpdateCardImageLinks(cards);
@@ -120,7 +120,7 @@ public class ScryfallServiceTests
         ];
 
         _scryfallClientMock.Setup(api => api.GetCard(It.IsAny<Guid>()))
-            .ReturnsAsync(new CardDataDTO { Name = "Card 1", ImageUriData = new CardImageUriDTO("https://example.com/card1.jpg") });
+            .ReturnsAsync(new CardDataDTO { Name = "Card 1", ImageUriData = new CardImageUriDTO() { Large = "https://example.com/card1.jpg" } });
 
         // Act
         await _service.UpdateCardImageLinks(cards);
@@ -160,14 +160,19 @@ public class ScryfallServiceTests
         ];
 
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
-            .ReturnsAsync(new CardSearchDTO(
-                [
-                    new CardDataDTO { Name = "Card 1", CardFaces =
-                    [
-                        new("Front", new CardImageUriDTO("https://example.com/card1.jpg")),
-                        new("Back", new CardImageUriDTO("https://example.com/card1-back.jpg"))
-                    ]}
-                ]));
+            .ReturnsAsync(new CardSearchDTO()
+            {
+                Data = [
+                    new CardDataDTO 
+                    { 
+                        Name = "Card 1", 
+                        CardFaces =
+                        [
+                            new CardFaceDTO () { Name = "Front", ImageUriData = new CardImageUriDTO() { Large = "https://example.com/card1.jpg" } },
+                            new CardFaceDTO () { Name = "Back", ImageUriData = new CardImageUriDTO() { Large = "https://example.com/card1-back.jpg" } }
+                        ]}
+                ]
+            });
 
         // Act
         await _service.UpdateCardImageLinks(cards);
@@ -187,18 +192,19 @@ public class ScryfallServiceTests
         ];
 
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
-            .ReturnsAsync(new CardSearchDTO(
-                [
+            .ReturnsAsync(new CardSearchDTO()
+            {
+                Data = [
                     new CardDataDTO 
                     { 
                         Name = "Card 1", 
                         CardFaces =
                         [
-                            new("Front", new CardImageUriDTO("https://example.com/card1.jpg")),
-                            new("Back", new CardImageUriDTO("https://example.com/card1-back.jpg"))
-                        ]
-                    }
-                ]));
+                            new CardFaceDTO () { Name = "Front", ImageUriData = new CardImageUriDTO() { Large = "https://example.com/card1.jpg" } },
+                            new CardFaceDTO () { Name = "Back", ImageUriData = new CardImageUriDTO() { Large = "https://example.com/card1-back.jpg" } }
+                        ]}
+                ]
+            });
 
         // Act
         await _service.UpdateCardImageLinks(cards);
@@ -220,10 +226,16 @@ public class ScryfallServiceTests
         ];
 
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
-            .ReturnsAsync(new CardSearchDTO(
-                [
-                    new CardDataDTO { Name = "Card 1", AllParts = [new CardPartDTO("Card 1 Token", ScryfallParts.TOKEN, "https://example.com/card1-token.jpg")] }
-                ]));
+            .ReturnsAsync(new CardSearchDTO()
+            {
+                Data = [
+                    new CardDataDTO
+                    {
+                        Name = "Card 1", 
+                        AllParts = [new CardPartDTO() { Name = "Card 1 Token", Component = ScryfallParts.COMPONENT_TOKEN, Uri = "https://example.com/card1-token.jpg" }]
+                    }
+                ]
+            });
 
         // Act
         await _service.UpdateCardImageLinks(cards, tokenCopies: 1);
@@ -243,10 +255,16 @@ public class ScryfallServiceTests
         ];
 
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
-            .ReturnsAsync(new CardSearchDTO(
-                [
-                    new CardDataDTO { Name = "Card 1", AllParts = [new CardPartDTO("Card 1 Token", ScryfallParts.TOKEN, "https://example.com/card1-token.jpg")] }
-                ]));
+            .ReturnsAsync(new CardSearchDTO()
+            {
+                Data = [
+                    new CardDataDTO
+                    {
+                        Name = "Card 1", 
+                        AllParts = [new CardPartDTO() { Name = "Card 1 Token", Component = ScryfallParts.COMPONENT_TOKEN, Uri = "https://example.com/card1-token.jpg" }]
+                    }
+                ]
+            });
 
         // Act
         await _service.UpdateCardImageLinks(cards);
@@ -266,12 +284,18 @@ public class ScryfallServiceTests
         var tokenId = Guid.NewGuid();
 
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
-            .ReturnsAsync(new CardSearchDTO(
-                [
-                    new CardDataDTO { Name = "Card 1", AllParts = [new CardPartDTO("Card 1 Token", ScryfallParts.TOKEN, $"https://example.com/{tokenId}")] }
-                ]));
+            .ReturnsAsync(new CardSearchDTO()
+            {
+                Data = [
+                    new CardDataDTO
+                    {
+                        Name = "Card 1", 
+                        AllParts = [new CardPartDTO() { Name = "Card 1 Token", Component = ScryfallParts.COMPONENT_TOKEN, Uri = $"https://example.com/{tokenId}" }]
+                    }
+                ]
+            });
         _scryfallClientMock.Setup(api => api.GetCard(tokenId))
-            .ReturnsAsync(new CardDataDTO { Name = "Card 1 Token", ImageUriData = new CardImageUriDTO("https://example.com/card1-token.jpg") });
+            .ReturnsAsync(new CardDataDTO { Name = "Card 1 Token", ImageUriData = new CardImageUriDTO() { Large = "https://example.com/card1-token.jpg" } });
 
         // Act
         await _service.UpdateCardImageLinks(cards, tokenCopies: 3);
@@ -291,12 +315,18 @@ public class ScryfallServiceTests
         var tokenId = Guid.NewGuid();
 
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
-            .ReturnsAsync(new CardSearchDTO(
-                [
-                    new CardDataDTO { Name = "Card 1", AllParts = [new CardPartDTO("Card 1 Token", ScryfallParts.TOKEN, $"https://example.com/{tokenId}")] }
-                ]));
+            .ReturnsAsync(new CardSearchDTO()
+            {
+                Data = [
+                    new CardDataDTO
+                    {
+                        Name = "Card 1", 
+                        AllParts = [new CardPartDTO() { Name = "Card 1 Token", Component = ScryfallParts.COMPONENT_TOKEN, Uri = $"https://example.com/{tokenId}" }]
+                    }
+                ]
+            });
         _scryfallClientMock.Setup(api => api.GetCard(tokenId))
-            .ReturnsAsync(new CardDataDTO { Name = "Card 1 Token", ImageUriData = new CardImageUriDTO("https://example.com/card1-token.jpg") });
+            .ReturnsAsync(new CardDataDTO { Name = "Card 1 Token", ImageUriData = new CardImageUriDTO() { Large = "https://example.com/card1-token.jpg" } });
 
         // Act
         await _service.UpdateCardImageLinks(cards);
@@ -316,13 +346,23 @@ public class ScryfallServiceTests
         ];
         var tokenId = Guid.NewGuid();
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
-            .ReturnsAsync(new CardSearchDTO(
-                [
-                    new CardDataDTO { Name = "Card 1", AllParts = [new CardPartDTO("Token", ScryfallParts.TOKEN, $"https://example.com/{tokenId}")] },
-                    new CardDataDTO { Name = "Card 2", AllParts = [new CardPartDTO("Token", ScryfallParts.TOKEN, $"https://example.com/{tokenId}")] }
-                ]));
+            .ReturnsAsync(new CardSearchDTO()
+            {
+                Data = [
+                    new CardDataDTO
+                    {
+                        Name = "Card 1", 
+                        AllParts = [new CardPartDTO() { Name = "Token", Component = ScryfallParts.COMPONENT_TOKEN, Uri = $"https://example.com/{tokenId}" }]
+                    },
+                    new CardDataDTO
+                    {
+                        Name = "Card 2", 
+                        AllParts = [new CardPartDTO() { Name = "Token", Component = ScryfallParts.COMPONENT_TOKEN, Uri = $"https://example.com/{tokenId}" }]
+                    }
+                ]
+            });
         _scryfallClientMock.Setup(api => api.GetCard(tokenId))
-            .ReturnsAsync(new CardDataDTO { Name = "Card 1 Token", ImageUriData = new CardImageUriDTO("https://example.com/token.jpg") });
+            .ReturnsAsync(new CardDataDTO { Name = "Token", ImageUriData = new CardImageUriDTO() { Large = "https://example.com/token.jpg" } });
         
         // Act
         await _service.UpdateCardImageLinks(cards, tokenCopies: 1, groupTokens: true);
@@ -342,13 +382,23 @@ public class ScryfallServiceTests
         ];
         var tokenId = Guid.NewGuid();
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
-            .ReturnsAsync(new CardSearchDTO(
-                [
-                    new CardDataDTO { Name = "Card 1", AllParts = [new CardPartDTO("Token", ScryfallParts.TOKEN, $"https://example.com/{tokenId}")] },
-                    new CardDataDTO { Name = "Card 2", AllParts = [new CardPartDTO("Token", ScryfallParts.TOKEN, $"https://example.com/{tokenId}")] }
-                ]));
+            .ReturnsAsync(new CardSearchDTO()
+            {
+                Data = [
+                    new CardDataDTO
+                    {
+                        Name = "Card 1", 
+                        AllParts = [new CardPartDTO() { Name = "Token", Component = ScryfallParts.COMPONENT_TOKEN, Uri = $"https://example.com/{tokenId}" }]
+                    },
+                    new CardDataDTO
+                    {
+                        Name = "Card 2", 
+                        AllParts = [new CardPartDTO() { Name = "Token", Component = ScryfallParts.COMPONENT_TOKEN, Uri = $"https://example.com/{tokenId}" }]
+                    }
+                ]
+            });
         _scryfallClientMock.Setup(api => api.GetCard(tokenId))
-            .ReturnsAsync(new CardDataDTO { Name = "Token", ImageUriData = new CardImageUriDTO("https://example.com/token.jpg") });
+            .ReturnsAsync(new CardDataDTO { Name = "Token", ImageUriData = new CardImageUriDTO() { Large = "https://example.com/token.jpg" } });
         
         // Act
         await _service.UpdateCardImageLinks(cards, tokenCopies: 1, groupTokens: false);

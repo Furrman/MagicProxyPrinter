@@ -2,7 +2,10 @@ using System.Text.Json.Serialization;
 
 namespace Domain.Models.DTO.Scryfall;
 
-public record CardSearchDTO(ICollection<CardDataDTO?>? Data);
+public record CardSearchDTO
+{
+    public ICollection<CardDataDTO?>? Data { get; set; }
+}
 
 public record CardDataDTO
 {
@@ -19,8 +22,24 @@ public record CardDataDTO
     public CardImageUriDTO? ImageUriData { get; set; }
 }
 
-public record CardFaceDTO(string? Name, [property: JsonPropertyName("image_uris")] CardImageUriDTO? ImageUriData);
+public record CardFaceDTO
+{
+    public string? Name { get; set; } 
+    [JsonPropertyName("image_uris")] 
+    public CardImageUriDTO? ImageUriData { get; set; }
+}
 
-public record CardImageUriDTO(string? Large);
+public record CardImageUriDTO
+{
+    public string? Large { get; set; }
+}
 
-public record CardPartDTO(string Name, string Component, string Uri);
+public record CardPartDTO
+{
+    public Guid? Id { get; set; }
+    public string? Name { get; set; }
+    public string? Component { get; set; }
+    public string? Uri { get; set; }
+    [JsonPropertyName("type_line")]
+    public string? TypeLine { get; set; }
+}

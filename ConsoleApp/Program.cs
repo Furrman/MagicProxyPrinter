@@ -25,6 +25,7 @@ internal class Program
             [CoconoaOptions(Description = "Group tokens based on the name")] bool groupTokens = false,
             [CoconoaOptions(Description = "Directory path to output file(s)")]string? outputPath = null,
             [CoconoaOptions(Description = "Filename of the output word file")]string? outputFileName = null,
+            [CoconoaOptions(Description = "Include emblems attached to a cards into output document")] bool includeEmblems = false,
             [CoconoaOptions(Description = "Flag to store original images in the same folder as output file")] bool storeOriginalImages = false) =>
         {
             if (deckUrl is null && deckUrl is null)
@@ -45,12 +46,12 @@ internal class Program
                 return;
             }
 
-            if (tokenCopies is not null && tokenCopies <= 0)
+            if (tokenCopies <= 0)
             {
                 ConsoleUtility.WriteErrorMessage("Number of copies for each token has to be greater than 0.");
                 return;
             }
-            if (tokenCopies is not null && tokenCopies > 100)
+            if (tokenCopies > 100)
             {
                 ConsoleUtility.WriteErrorMessage("Number of copies for each token has to be less than 100.");
                 return;
@@ -65,6 +66,7 @@ internal class Program
                 languageCode,
                 tokenCopies ?? 0,
                 groupTokens,
+                includeEmblems,
                 storeOriginalImages).Wait();
         });
     }
