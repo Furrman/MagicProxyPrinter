@@ -54,7 +54,7 @@ public class ArchidektService(IArchidektClient archidektApiClient, ILogger<Archi
     {
         deckId = 0;
         
-        string pattern = @"^https:\/\/(www\.)?archidekt\.com\/(?:api\/decks\/(\d+)\/|decks\/(\d+)\/?)";
+        string pattern = @"^(https?:\/\/)?(www\.)?archidekt\.com\/(?:api\/decks\/(\d+)\/|decks\/(\d+)\/?)";
         Regex regex = new(pattern);
 
         Match match = regex.Match(url);

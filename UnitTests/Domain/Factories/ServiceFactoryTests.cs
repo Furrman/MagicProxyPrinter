@@ -20,6 +20,8 @@ public class ServiceFactoryTests
     }
 
     [Theory]
+    [InlineData("archidekt.com/decks/123456/test")]
+    [InlineData("www.archidekt.com/decks/123456/test")]
     [InlineData("https://archidekt.com/decks/123456/test")]
     [InlineData("https://www.archidekt.com/decks/123456/test")]
     public void GetDeckRetriever_WithArchidektUrl_ReturnsArchidektServiceObject(string deckUrl)
@@ -37,6 +39,8 @@ public class ServiceFactoryTests
     }
 
     [Theory]
+    [InlineData("edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA")]
+    [InlineData("www.edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA")]
     [InlineData("https://edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA")]
     [InlineData("https://www.edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA")]
     public void GetDeckRetriever_WithEdhrecUrl_ReturnsEdhrecServiceObject(string deckUrl)
@@ -54,6 +58,8 @@ public class ServiceFactoryTests
     }
 
     [Theory]
+    [InlineData("moxfield.com/decks/123456/test")]
+    [InlineData("www.moxfield.com/decks/123456/test")]
     [InlineData("https://moxfield.com/decks/123456/test")]
     [InlineData("https://www.moxfield.com/decks/123456/test")]
     public void GetDeckRetriever_WithMoxfieldUrl_ReturnsMoxfieldServiceObject(string deckUrl)

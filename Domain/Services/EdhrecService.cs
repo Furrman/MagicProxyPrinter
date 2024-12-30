@@ -118,7 +118,7 @@ public class EdhrecService(IEdhrecClient edhrecClient,
     {
         relativePath = string.Empty;
 
-        string pattern = @"^https://(www\.)?edhrec\.com/(?<relativePath>(commanders|deckpreview)/.+)$";
+        string pattern = @"^(https?:\/\/)?(www\.)?edhrec\.com/(?<relativePath>(commanders|deckpreview)/.+)$";
         Regex regex = new(pattern);
 
         Match match = regex.Match(url);
