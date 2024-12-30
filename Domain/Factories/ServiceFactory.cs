@@ -51,8 +51,14 @@ public class ServiceFactory(IServiceProvider serviceProvider) : IServiceFactory
     {
         try
         {
-            var uri = new Uri(url);
-            return uri.Host.ToLowerInvariant();
+            Uri uri = new(url);
+            string host = uri.Host.ToLowerInvariant();
+            if (host.StartsWith("www."))
+            {
+                host = host[4..];
+            }
+
+            return host;
         }
         catch
         {
