@@ -100,8 +100,10 @@ public class MagicProxyPrinter : IMagicProxyPrinter
         bool includeEmblems = false,
         bool saveImages = false)
     {
-        if (deckUrl != null) await GenerateWordFromDeckOnline(deckUrl, outputDirPath, outputFileName, languageCode, tokenCopies, groupTokens, saveImages);
-        else if (inputFilePath != null) await GenerateWordFromDeckInFile(inputFilePath, outputDirPath, outputFileName, languageCode, tokenCopies, groupTokens, saveImages);
+        if (deckUrl != null) await GenerateWordFromDeckOnline(deckUrl, outputDirPath, outputFileName, 
+            languageCode, tokenCopies, groupTokens, includeEmblems: includeEmblems, saveImages: saveImages);
+        else if (inputFilePath != null) await GenerateWordFromDeckInFile(inputFilePath, outputDirPath, outputFileName, 
+            languageCode, tokenCopies, groupTokens, includeEmblems: includeEmblems, saveImages: saveImages);
         else throw new ArgumentException("Wrong input parameters to download deck.");
     }
 
@@ -122,7 +124,7 @@ public class MagicProxyPrinter : IMagicProxyPrinter
             return;
         }
 
-        await _scryfallService.UpdateCardImageLinks(deck.Cards, languageCode, tokenCopies, groupTokens);
+        await _scryfallService.UpdateCardImageLinks(deck.Cards, languageCode, tokenCopies, groupTokens, includeEmblems);
 
         await _wordGeneratorService.GenerateWord(deck, outputFileName, outputDirPath, saveImages);
     }
@@ -145,7 +147,7 @@ public class MagicProxyPrinter : IMagicProxyPrinter
 
         var deck = _fileParser.GetDeckFromFile(deckListFilePath);
 
-        await _scryfallService.UpdateCardImageLinks(deck.Cards, languageCode, tokenCopies, groupTokens);
+        await _scryfallService.UpdateCardImageLinks(deck.Cards, languageCode, tokenCopies, groupTokens, includeEmblems);
 
         await _wordGeneratorService.GenerateWord(deck, outputFileName, outputDirPath, saveImages);
     }
