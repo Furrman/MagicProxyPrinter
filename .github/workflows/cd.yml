@@ -67,7 +67,10 @@ jobs:
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: "MagicProxyPrinter*.zip MagicProxyPrinter*.tar.gz"
+          files: |
+            MagicProxyPrinter-${{ github.ref_name || github.event.inputs.tag_name }}-linux-x64.tar.gz
+            MagicProxyPrinter-${{ github.ref_name || github.event.inputs.tag_name }}-osx-x64.tar.gz
+            MagicProxyPrinter-${{ github.ref_name || github.event.inputs.tag_name }}-win-x64.zip
           tag_name: ${{ github.ref_name || github.event.inputs.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
