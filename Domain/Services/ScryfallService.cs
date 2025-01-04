@@ -7,7 +7,6 @@ using Domain.Models.DTO.Scryfall;
 using Domain.Constants;
 using Domain.Helpers;
 using Domain.IO;
-using DocumentFormat.OpenXml.Office2010.Excel;
 
 namespace Domain.Services;
 
@@ -234,7 +233,8 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
 
     private void AddRelatedEmblemsToCardImages(CardEntryDTO card, CardDataDTO searchedCard)
     {
-        var allParts = searchedCard!.AllParts?.Where(p => p.TypeLine == ScryfallParts.TYPE_LINE_EMBLEM);
+        var allParts = searchedCard!.AllParts?.Where(p => 
+            p.TypeLine?.Contains(ScryfallParts.TYPE_LINE_EMBLEM) ?? false);
         if (allParts is not null)
         {
             foreach (var part in allParts)
