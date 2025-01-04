@@ -234,7 +234,8 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
 
     private void AddRelatedEmblemsToCardImages(CardEntryDTO card, CardDataDTO searchedCard)
     {
-        var allParts = searchedCard!.AllParts?.Where(p => p.TypeLine == ScryfallParts.TYPE_LINE_EMBLEM);
+        var allParts = searchedCard!.AllParts?.Where(p => 
+            p.TypeLine?.Contains(ScryfallParts.TYPE_LINE_EMBLEM) ?? false);
         if (allParts is not null)
         {
             foreach (var part in allParts)
