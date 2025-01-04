@@ -7,7 +7,6 @@ using Domain.Models.DTO.Scryfall;
 using Domain.Constants;
 using Domain.Helpers;
 using Domain.IO;
-using DocumentFormat.OpenXml.Office2010.Excel;
 
 namespace Domain.Services;
 
