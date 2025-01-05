@@ -52,41 +52,36 @@ public class GoldfishService(IGoldfishClient goldfishClient,
         deck.Name = deckNameNode != null ? deckNameNode.InnerText.Trim() : string.Empty;
 
         // Extract cards
-        var cardRows = htmlDoc.DocumentNode.SelectNodes("//table[contains(@class, 'deck-view-deck-table')]//tr[td]");
-
-        if (cardRows != null)
+        var deckInputNode = htmlDoc.DocumentNode.SelectSingleNode("//input[@id='deck_input_deck']");
+        if (deckInputNode == null)
         {
-            foreach (var row in cardRows)
-            {
-                var quantityNode = row.SelectSingleNode("./td[contains(@class, 'text-right')]");
-                var nameNode = row.SelectSingleNode("./td//a[contains(@data-card-id, '')]");
-
-                if (quantityNode == null || nameNode == null)
-                {
-                    continue;
-                }
-
-                int.TryParse(quantityNode.InnerText.Trim(), out int quantity);
-                if (quantity == 0)
-                {
-                    quantity = 1;
-                }
-                string cardName = nameNode.InnerText.Trim();
-                string cardId = nameNode.GetAttributeValue("data-card-id", string.Empty);
-                Guid? id = null;
-                if (!string.IsNullOrEmpty(cardId))
-                {
-                    var result = Guid.TryParse(cardId, out Guid guid);
-                    if (result)
-                    {
-                        id = guid;
-                    }
-                }
-                    
-                deck.Cards.Add(new CardEntryDTO { Id = id, Name = cardName, Quantity = quantity });
-            }
+            return deck;
         }
+        string deckData = System.Net.WebUtility.HtmlDecode(deckInputNode.GetAttributeValue("value", string.Empty));
+        var lines = deckData.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        foreach (var line in lines)
+        {
+            // Trim the line and skip if it's empty or doesn't start with a number
+            var trimmedLine = line.Trim();
+            if (string.IsNullOrWhiteSpace(trimmedLine) || !char.IsDigit(trimmedLine[0]))
+                continue;
 
+            var parts = trimmedLine.Split(' ', 2);
+            if (parts.Length < 2) continue;
+
+            if (!int.TryParse(parts[0], out int quantity))
+                continue;
+
+            string cardName = System.Net.WebUtility.HtmlDecode(parts[1].Trim());
+
+            deck.Cards.Add(new CardEntryDTO
+            {
+                Id = null, // No GUID is provided in this case
+                Name = cardName,
+                Quantity = quantity,
+            });
+        }
+        
         return deck;
     }
 
