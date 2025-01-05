@@ -23,6 +23,8 @@ public class ArchidektServiceTests
     }
 
     [Theory]
+    [InlineData("archidekt.com/api/decks/123/", 123)]
+    [InlineData("www.archidekt.com/decks/456/", 456)]
     [InlineData("https://archidekt.com/api/decks/123/", 123)]
     [InlineData("https://archidekt.com/decks/456/", 456)]
     public void TryExtractDeckIdFromUrl_ValidUrl_ReturnsTrueAndExtractedDeckId(string url, int expectedDeckId)

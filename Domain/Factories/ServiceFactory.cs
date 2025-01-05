@@ -52,7 +52,15 @@ public class ServiceFactory(IServiceProvider serviceProvider) : IServiceFactory
     {
         try
         {
-            Uri uri = new(url);
+            // Try to create a Uri object; if it fails without a scheme, prepend "https://"
+            if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri))
+            {
+                if (!Uri.TryCreate("https://" + url, UriKind.Absolute, out uri))
+                {
+                    return string.Empty;
+                }
+            }
+            
             string host = uri.Host.ToLowerInvariant();
             if (host.StartsWith("www."))
             {

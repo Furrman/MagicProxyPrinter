@@ -39,9 +39,10 @@ public interface IScryfallService
     /// <param name="languageCode">The language code for localization (optional).</param>
     /// <param name="tokenCopies">Quantity of each token (optional).</param>
     /// <param name="groupTokens">Group tokens based on name (optional).</param>
+    /// <param name="includeEmblems">Include emblems to documents (optional).</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task UpdateCardImageLinks(List<CardEntryDTO> cards, 
-        string? languageCode = null, int tokenCopies = 0, bool groupTokens = false);
+        string? languageCode = null, int tokenCopies = 0, bool groupTokens = false, bool includeEmblems = false);
 }
 
 public class ScryfallService(IScryfallClient scryfallApiClient, 
@@ -76,7 +77,7 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
     }
 
     public async Task UpdateCardImageLinks(List<CardEntryDTO> cards, 
-        string? languageCode = null, int tokenCopies = 0, bool groupTokens = false)
+        string? languageCode = null, int tokenCopies = 0, bool groupTokens = false, bool includeEmblems = false)
     {
         try
         {
@@ -84,7 +85,8 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
             int step = UpdateStep(0, count);
             foreach (var card in cards)
             {
-                var images = await GetCardImageUrls(card, languageCode: languageCode, getTokens: tokenCopies > 0);
+                var images = await GetCardImageUrls(card, languageCode: languageCode, 
+                    getTokens: tokenCopies > 0, includeEmblems: includeEmblems);
                 if (images != null)
                 {
                     card.CardSides = images;
@@ -101,7 +103,11 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
     }
 
 
-    private async Task<HashSet<CardSideDTO>?> GetCardImageUrls(CardEntryDTO card, string? languageCode = null, bool getTokens = false)
+    private async Task<HashSet<CardSideDTO>?> GetCardImageUrls(
+        CardEntryDTO card, 
+        string? languageCode = null, 
+        bool getTokens = false,
+        bool includeEmblems = false)
     {
         var scryfallCardData = await SearchCard(card, languageCode);
         // If card was not found, try to search it without language code
@@ -124,6 +130,10 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
         {
             AddRelatedTokensToCardImages(card, scryfallCardData);
         }
+        if (includeEmblems)
+        {
+            AddRelatedEmblemsToCardImages(card, scryfallCardData);
+        }
 
         return cardSides;
     }
@@ -137,7 +147,7 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
 
         // Check if we have enough details about specific card for a Find instead of Search
         var cardSearch = card.ExpansionCode != null && card.CollectorNumber != null
-                ? new([await _scryfallApiClient.FindCard(card.Name, card.ExpansionCode, card.CollectorNumber, languageCode)])
+                ? new() { Data = [await _scryfallApiClient.FindCard(card.Name, card.ExpansionCode, card.CollectorNumber, languageCode)] }
                 : await _scryfallApiClient.SearchCard(card.Name, card.ExpansionCode is not null || card.Etched || card.Art, languageCode != null);
 
         // Look for searched card in the search result
@@ -208,23 +218,44 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
 
     private void AddRelatedTokensToCardImages(CardEntryDTO card, CardDataDTO searchedCard)
     {
-        var allParts = searchedCard!.AllParts?.Where(p => p.Component == ScryfallParts.TOKEN);
+        var allParts = searchedCard!.AllParts?.Where(p => p.Component == ScryfallParts.COMPONENT_TOKEN);
         if (allParts is not null)
         {
             foreach (var part in allParts)
             {
                 card.Tokens.Add(new CardTokenDTO
                 {
-                    Name = part.Name,
-                    Uri = part.Uri
+                    Id = part.Id,
+                    Name = part.Name ?? string.Empty,
+                    Uri = part.Uri ?? string.Empty
                 });
             }
         }
     }
 
+    private void AddRelatedEmblemsToCardImages(CardEntryDTO card, CardDataDTO searchedCard)
+    {
+        var allParts = searchedCard!.AllParts?.Where(p => 
+            p.TypeLine?.Contains(ScryfallParts.TYPE_LINE_EMBLEM) ?? false);
+        if (allParts is not null)
+        {
+            foreach (var part in allParts)
+            {
+                card.Tokens.Add(new CardTokenDTO
+                {
+                    Id = part.Id,
+                    Name = part.Name ?? string.Empty,
+                    Uri = part.Uri ?? string.Empty,
+                    IsEmblem = true
+                });
+            }
+        }
+    }
+    
+
     private async Task UpdateTokens(List<CardEntryDTO> cards, int tokenCopies, bool groupTokens)
     {
-        // Casting to list, because it is gonna be modified
+        // Casting to list, because it will be modified
         var tokens = cards.SelectMany(c => c.Tokens)
             .ToList();
         if (groupTokens)
@@ -236,10 +267,10 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
 
         foreach (var token in tokens)
         {
-            var tokenId = UrlHelper.GetGuidFromLastPartOfUrl(token.Uri!);
+            var tokenId = token.Id ?? UrlHelper.GetGuidFromLastPartOfUrl(token.Uri!);
             if (tokenId is null)
             {
-                _logger.LogError("Token {Name} does not have a valid Scryfall URI", token.Name);
+                _logger.LogError("Token {Name} does not have a valid Scryfall reference", token.Name);
                 continue;
             }
             var cardToken = await _scryfallApiClient.GetCard(tokenId.Value);
@@ -247,8 +278,8 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
             {
                 cards.Add(new CardEntryDTO
                 {
-                    Name = token.Name,
-                    Quantity = tokenCopies,
+                    Name = token.Name ?? string.Empty,
+                    Quantity = token.IsEmblem ? 1 : tokenCopies,
                     ExpansionCode = cardToken.Set,
                     CardSides = [new CardSideDTO { Name = cardToken.Name!, ImageUrl = cardToken.ImageUriData?.Large ?? string.Empty }]
                 });

@@ -53,7 +53,7 @@ public class MagicProxyPrinterTests
             .ReturnsAsync(new DeckDetailsDTO());
 
         // Act
-        await _proxyPrinter.GenerateWord(deckUrl, null, outputPath, outputFileName, languageCode, tokenCopies, printAllTokens, saveImages);
+        await _proxyPrinter.GenerateWord(deckUrl, null, outputPath, outputFileName, languageCode, tokenCopies, printAllTokens, saveImages: saveImages);
 
         // Assert
         _deckRetrieveStrategyMock.Verify(x => x.GetDeck(It.IsAny<string>()), Times.Once);
@@ -77,12 +77,17 @@ public class MagicProxyPrinterTests
             .Returns(new DeckDetailsDTO());
 
         // Act
-        await _proxyPrinter.GenerateWord(null, inputFilePath, outputPath, outputFileName, languageCode, tokenCopies, printAllTokens, saveImages);
+        await _proxyPrinter.GenerateWord(null, inputFilePath, outputPath, outputFileName, languageCode, 
+            tokenCopies, printAllTokens, saveImages: saveImages);
 
         // Assert
         _fileParserMock.Verify(x => x.GetDeckFromFile(inputFilePath), Times.Once);
-        _scryfallServiceMock.Verify(x => x.UpdateCardImageLinks(It.IsAny<List<CardEntryDTO>>(), languageCode, tokenCopies, printAllTokens), Times.Once);
-        _wordGeneratorServiceMock.Verify(x => x.GenerateWord(It.IsAny<DeckDetailsDTO>(), It.IsAny<string>(), It.IsAny<string>(), saveImages), Times.Once);
+        _scryfallServiceMock.Verify(x 
+            => x.UpdateCardImageLinks(It.IsAny<List<CardEntryDTO>>(), languageCode, tokenCopies, printAllTokens, 
+                It.IsAny<bool>()), Times.Once);
+        _wordGeneratorServiceMock.Verify(x 
+            => x.GenerateWord(It.IsAny<DeckDetailsDTO>(), It.IsAny<string>(), 
+                It.IsAny<string>(), saveImages), Times.Once);
     }
 
     [Fact]
@@ -99,9 +104,11 @@ public class MagicProxyPrinterTests
         bool saveImages = true;
 
         // Act
-        Func<Task> act = async () => await _proxyPrinter.GenerateWord(deckUrl, inputFilePath, outputPath, outputFileName, languageCode, tokenCopies, printAllTokens, saveImages);
+        Func<Task> act = async () => await _proxyPrinter.GenerateWord(deckUrl, inputFilePath, outputPath, 
+            outputFileName, languageCode, tokenCopies, printAllTokens, saveImages);
         
         // Assert
-        act.Should().ThrowAsync<ArgumentException>().WithMessage("Wrong input parameters to download deck.");
+        act.Should().ThrowAsync<ArgumentException>()
+            .WithMessage("Wrong input parameters to download deck.");
     }
 }

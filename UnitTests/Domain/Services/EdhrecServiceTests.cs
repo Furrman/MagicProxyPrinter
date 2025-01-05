@@ -25,6 +25,10 @@ public class EdhrecServiceTests
     }
 
     [Theory]
+    [InlineData("edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA", "deckpreview/7VNuM_Ce5b3JbQrhfTsObA")]
+    [InlineData("edhrec.com/commanders/7VNuM_Ce5b3JbQrhfTsObA", "commanders/7VNuM_Ce5b3JbQrhfTsObA")]
+    [InlineData("www.edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA", "deckpreview/7VNuM_Ce5b3JbQrhfTsObA")]
+    [InlineData("www.edhrec.com/commanders/7VNuM_Ce5b3JbQrhfTsObA", "commanders/7VNuM_Ce5b3JbQrhfTsObA")]
     [InlineData("https://www.edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA", "deckpreview/7VNuM_Ce5b3JbQrhfTsObA")]
     [InlineData("https://www.edhrec.com/commanders/7VNuM_Ce5b3JbQrhfTsObA", "commanders/7VNuM_Ce5b3JbQrhfTsObA")]
     [InlineData("https://edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA", "deckpreview/7VNuM_Ce5b3JbQrhfTsObA")]

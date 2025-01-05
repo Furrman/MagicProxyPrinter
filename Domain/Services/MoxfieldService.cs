@@ -53,13 +53,13 @@ public class MoxfieldService(IMoxfieldClient moxfieldClient, ILogger<MoxfieldSer
     public bool TryExtractDeckIdFromUrl(string url, out string deckId)
     {
         deckId = string.Empty;
-        string pattern = @"^https:\/\/(www\.)?moxfield\.com\/decks\/([\w\-._~]+)(\/|(\?.*)?)$";
+        string pattern = @"^(https?:\/\/)?(www\.)?moxfield\.com\/decks\/([\w\-._~]+)(\/|(\?.*)?)$";
         Regex regex = new(pattern);
 
         Match match = regex.Match(url);
         if (match.Success)
         {
-            deckId = match.Groups[2].Value;
+            deckId = match.Groups[3].Value;
             return true;
         }
 

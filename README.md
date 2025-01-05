@@ -69,6 +69,7 @@ Options:
   --group-tokens                 Group tokens based on the name
   --output-path <String>         Directory path to output file(s)
   --output-file-name <String>    Filename of the output word file
+  --include-emblems              Include emblems attached to a cards into output document
   --store-original-images        Flag to store original images in the same folder as output file
   -h, --help                     Show help message
   --version                      Show version

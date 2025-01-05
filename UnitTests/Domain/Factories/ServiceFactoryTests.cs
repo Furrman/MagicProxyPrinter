@@ -19,11 +19,14 @@ public class ServiceFactoryTests
         );
     }
 
-    [Fact]
-    public void GetDeckRetriever_WithArchidektUrl_ReturnsArchidektServiceObject()
+    [Theory]
+    [InlineData("archidekt.com/decks/123456/test")]
+    [InlineData("www.archidekt.com/decks/123456/test")]
+    [InlineData("https://archidekt.com/decks/123456/test")]
+    [InlineData("https://www.archidekt.com/decks/123456/test")]
+    public void GetDeckRetriever_WithArchidektUrl_ReturnsArchidektServiceObject(string deckUrl)
     {
         // Arrange
-        string deckUrl = "https://archidekt.com/decks/123456/test";
         _serviceProviderMock.Setup(x => x.GetService(typeof(IArchidektService)))
             .Returns(new Mock<IArchidektService>().Object);
 
@@ -35,11 +38,14 @@ public class ServiceFactoryTests
         deckRetriever.Should().NotBeNull();
     }
 
-    [Fact]
-    public void GetDeckRetriever_WithEdhrecUrl_ReturnsEdhrecServiceObject()
+    [Theory]
+    [InlineData("edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA")]
+    [InlineData("www.edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA")]
+    [InlineData("https://edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA")]
+    [InlineData("https://www.edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA")]
+    public void GetDeckRetriever_WithEdhrecUrl_ReturnsEdhrecServiceObject(string deckUrl)
     {
         // Arrange
-        string deckUrl = "https://edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA";
         _serviceProviderMock.Setup(x => x.GetService(typeof(IEdhrecService)))
             .Returns(new Mock<IEdhrecService>().Object);
         
@@ -51,11 +57,14 @@ public class ServiceFactoryTests
         deckRetriever.Should().NotBeNull();
     }
 
-    [Fact]
-    public void GetDeckRetriever_WithMoxfieldUrl_ReturnsMoxfieldServiceObject()
+    [Theory]
+    [InlineData("moxfield.com/decks/123456/test")]
+    [InlineData("www.moxfield.com/decks/123456/test")]
+    [InlineData("https://moxfield.com/decks/123456/test")]
+    [InlineData("https://www.moxfield.com/decks/123456/test")]
+    public void GetDeckRetriever_WithMoxfieldUrl_ReturnsMoxfieldServiceObject(string deckUrl)
     {
         // Arrange
-        string deckUrl = "https://moxfield.com/decks/123456/test";
         _serviceProviderMock.Setup(x => x.GetService(typeof(IMoxfieldService)))
             .Returns(new Mock<IMoxfieldService>().Object);
 
