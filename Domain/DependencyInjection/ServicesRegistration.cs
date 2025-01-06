@@ -25,6 +25,7 @@ public static class ServicesRegistration
             // Services
             .AddScoped<IArchidektService, ArchidektService>()
             .AddScoped<IEdhrecService, EdhrecService>()
+            .AddScoped<IGoldfishService, GoldfishService>()
             .AddScoped<IMoxfieldService, MoxfieldService>()
             .AddScoped<IScryfallService, ScryfallService>()
             .AddScoped<ILanguageService, LanguageService>()

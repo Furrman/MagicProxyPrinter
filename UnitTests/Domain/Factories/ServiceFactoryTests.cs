@@ -75,6 +75,24 @@ public class ServiceFactoryTests
         _serviceProviderMock.Verify(x => x.GetService(typeof(IMoxfieldService)), Times.Once);
     }
 
+    [Theory]
+    [InlineData("mtggoldfish.com/decks/123456/test")]
+    [InlineData("www.mtggoldfish.com/decks/123456/test")]
+    [InlineData("https://mtggoldfish.com/decks/123456/test")]
+    [InlineData("https://www.mtggoldfish.com/decks/123456/test")]
+    public void GetDeckRetriever_WithGolfFishUrl_ReturnsMoxfieldServiceObject(string deckUrl)
+    {
+        // Arrange
+        _serviceProviderMock.Setup(x => x.GetService(typeof(IMoxfieldService)))
+            .Returns(new Mock<IMoxfieldService>().Object);
+
+        // Act
+        var deckRetriever = _serviceFactory.GetDeckBuildService(deckUrl);
+
+        // Assert
+        _serviceProviderMock.Verify(x => x.GetService(typeof(IGoldfishService)), Times.Once);
+    }
+
     [Fact]
     public void GetDeckRetriever_WithNotMatchingUrl_ReturnsNull()
     {

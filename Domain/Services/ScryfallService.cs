@@ -7,6 +7,8 @@ using Domain.Models.DTO.Scryfall;
 using Domain.Constants;
 using Domain.Helpers;
 using Domain.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Domain.Services;
 
@@ -120,16 +122,9 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
             return null;
         }
 
-        HashSet<CardSideDTO>? cardSides;
-
-        if (IsDualSideCard(scryfallCardData))
-        {
-            cardSides = GetDualSideCardLinks(card, scryfallCardData);
-        }
-        else
-        {
-            cardSides = GetSingleSideCardLink(scryfallCardData);
-        }
+        HashSet<CardSideDTO>? cardSides = IsDualSideCard(scryfallCardData) 
+            ? GetDualSideCardLinks(card, scryfallCardData) 
+            : GetSingleSideCardLink(scryfallCardData);
 
         if (getTokens)
         {
@@ -157,20 +152,23 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
 
         // Look for searched card in the search result
         var searchedCard = cardSearch?.Data?.FirstOrDefault(c =>
-            c != null && c.Name != null && c.Name.Equals(card.Name, StringComparison.OrdinalIgnoreCase) // Find by name
+            c != null && c.Name != null && (c.Name.Equals(card.Name, StringComparison.OrdinalIgnoreCase) // Find by name
+                || c.Name.Split(" // ").Any(n => n.Equals(card.Name, StringComparison.OrdinalIgnoreCase))) // Find by name in dual side card
             && ((!card.Etched) || (card.Etched && c.TcgPlayerEtchedId is not null)) // Find etched frame if required
             && ((card.ExpansionCode is null) || string.Equals(card.ExpansionCode, c.Set)) // Find by expansion if required
             && ((languageCode is null) || c.Lang!.Equals(languageCode, StringComparison.OrdinalIgnoreCase)) // Find by expansion if required
             );
+        
         return searchedCard;
     }
     
 
     private bool IsArtCard(CardEntryDTO deckCard) => deckCard.Art;
 
-    private bool IsDualSideCard(CardDataDTO scryfallCardData) => scryfallCardData.CardFaces is not null;
+    private bool IsDualSideCard(CardDataDTO scryfallCardData) => scryfallCardData.CardFaces is not null
+        && scryfallCardData.ImageUriData is null; // If card has image and has card faces, it is Adventure card with one side
 
-    private HashSet<CardSideDTO>? GetDualSideCardLinks(CardEntryDTO deckCard, CardDataDTO scryfallCardData)
+    private HashSet<CardSideDTO> GetDualSideCardLinks(CardEntryDTO deckCard, CardDataDTO scryfallCardData)
     {
         if (IsArtCard(deckCard))
         {
@@ -178,7 +176,6 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
         }
 
         var cardSides = new HashSet<CardSideDTO>();
-
         foreach (var cardFace in scryfallCardData.CardFaces!)
         {
             if (cardFace.ImageUriData is null)
@@ -203,14 +200,19 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
 
     private HashSet<CardSideDTO>? GetSingleSideCardLink(CardDataDTO scryfallCardData)
     {
-        var cardSides = new HashSet<CardSideDTO>();
         if (scryfallCardData.ImageUriData?.Large is null)
         {
             _logger.LogError("Card {Name} does not have any url to its picture", scryfallCardData.Name);
             return null;
         }
 
-        cardSides.Add(new CardSideDTO { Name = scryfallCardData.Name ?? string.Empty, ImageUrl = scryfallCardData.ImageUriData.Large });
+        HashSet<CardSideDTO> cardSides =
+        [
+            new CardSideDTO
+            {
+                Name = scryfallCardData.Name ?? string.Empty, ImageUrl = scryfallCardData.ImageUriData.Large
+            }
+        ];
         return cardSides;
     }
 

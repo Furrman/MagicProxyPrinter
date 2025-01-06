@@ -6,7 +6,7 @@ If so, then this application is for you! It allows you to generate a printable a
 
 ## Features
 
-- Download deck list straight from deck-builder websites like Archidekt, Moxfield or EDHRec via URL 
+- Download deck list straight from deck-builder websites like Archidekt, Moxfield etc via URL 
 - Save cards resized and adjusted for printing in editable Word .docx format
 - Get deck list from exported file
 - Add cards number of times per number of quantity
@@ -20,6 +20,13 @@ If so, then this application is for you! It allows you to generate a printable a
 - Option to store original images alongside created document
 - Logs in separate file showing errors in receiving data
 - Show % progress status in console app
+
+## Supported websites
+
+- Archidekt
+- Moxfield
+- EDHRec
+- MTGGoldFish
 
 ## Plans
 
