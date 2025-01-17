@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Moq;
 
 using Domain.Factories;
@@ -35,7 +34,7 @@ public class ServiceFactoryTests
 
         // Assert
         _serviceProviderMock.Verify(x => x.GetService(typeof(IArchidektService)), Times.Once);
-        deckRetriever.Should().NotBeNull();
+        Assert.NotNull(deckRetriever);
     }
 
     [Theory]
@@ -54,7 +53,7 @@ public class ServiceFactoryTests
 
         // Assert
         _serviceProviderMock.Verify(x => x.GetService(typeof(IEdhrecService)), Times.Once);
-        deckRetriever.Should().NotBeNull();
+        Assert.NotNull(deckRetriever);
     }
 
     [Theory]
@@ -103,6 +102,6 @@ public class ServiceFactoryTests
         var deckRetriever = _serviceFactory.GetDeckBuildService(deckUrl);
 
         // Assert
-        deckRetriever.Should().BeNull();
+        Assert.Null(deckRetriever);
     }
 }
