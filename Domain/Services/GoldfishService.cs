@@ -89,7 +89,7 @@ public class GoldfishService(IGoldfishClient goldfishClient,
     {
         relativePath = string.Empty;
 
-        const string pattern = @"^(https://)?(www\.)?mtggoldfish\.com/(?<relativePath>(deck|archetype)/.+)$";
+        const string pattern = @"^(https://)?(www\.)?mtggoldfish\.com/(?<relativePath>(deck|archetype)/[^/]+/?)$";
         Regex regex = new(pattern);
 
         Match match = regex.Match(url);

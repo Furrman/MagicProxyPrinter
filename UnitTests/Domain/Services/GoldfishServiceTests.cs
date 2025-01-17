@@ -40,6 +40,7 @@ public class GoldfishServiceTests
     [Theory]
     [InlineData("https://mtggoldfish.com/deck")]
     [InlineData("https://mtggoldfish.com/deck/")]
+    [InlineData("https://mtggoldfish.com/deck/123fdgd/123fdgd")]
     [InlineData("https://mtggoldfish.com/")]
     public void TryExtractRelativePath_InvalidUrl_ReturnsFalse(string url)
     {

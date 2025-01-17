@@ -46,8 +46,10 @@ public class EdhrecServiceTests
     [Theory]
     [InlineData("https://edhrec.com/commanders")]
     [InlineData("https://edhrec.com/commanders/")]
+    [InlineData("https://edhrec.com/commanders/123fdgd/123fdgd")]
     [InlineData("https://edhrec.com/deckpreview")]
     [InlineData("https://edhrec.com/deckpreview/")]
+    [InlineData("https://edhrec.com/deckpreview/123fdgd/123fdgd")]
     [InlineData("https://edhrec.com/")]
     public void TryExtractRelativePath_InvalidUrl_ReturnsFalse(string url)
     {
