@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 
-using FluentAssertions;
 using Moq;
 
 using Domain.Clients;
@@ -33,8 +32,8 @@ public class GoldfishServiceTests
         bool result = _service.TryExtractRelativePath(url, out string relativePath);
 
         // Assert
-        result.Should().BeTrue();
-        relativePath.Should().Be(expectedPath);
+        Assert.True(result);
+        Assert.Equal(expectedPath, relativePath);
     }
 
     [Theory]
@@ -48,8 +47,8 @@ public class GoldfishServiceTests
         bool result = _service.TryExtractRelativePath(url, out string relatedPath);
 
         // Assert
-        result.Should().BeFalse();
-        relatedPath.Should().Be(string.Empty);
+        Assert.False(result);
+        Assert.Equal(string.Empty, relatedPath);
     }
 
     [Fact]
@@ -64,7 +63,7 @@ public class GoldfishServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
+        Assert.NotNull(result);
     }
     
     [Fact]
@@ -85,8 +84,8 @@ public class GoldfishServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Name.Should().Be("My First Deck");
+        Assert.NotNull(result);
+        Assert.Equal("My First Deck", result!.Name);
     }
 
     [Fact]
@@ -108,10 +107,10 @@ public class GoldfishServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Cards[0].Should().NotBeNull();
-        result.Cards[0].Id.Should().BeNull();
-        result.Cards[0].Name.Should().Be("Omniscience");
-        result.Cards[0].Quantity.Should().Be(4);
+        Assert.NotNull(result);
+        Assert.NotNull(result!.Cards[0]);
+        Assert.Null(result.Cards[0].Id);
+        Assert.Equal("Omniscience", result.Cards[0].Name);
+        Assert.Equal(4, result.Cards[0].Quantity);
     }
 }

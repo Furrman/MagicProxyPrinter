@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 
-using FluentAssertions;
 using Moq;
 
 using Domain.Services;
@@ -35,7 +34,7 @@ public class LanguageServiceTests
         bool result = _service.IsValidLanguage(languageCode);
 
         // Assert
-        result.Should().BeTrue();
+        Assert.True(result);
     }
 
     [Theory]
@@ -49,7 +48,7 @@ public class LanguageServiceTests
         bool result = _service.IsValidLanguage(languageCode);
 
         // Assert
-        result.Should().BeFalse();
+        Assert.False(result);
     }
 
     [Fact]
@@ -59,7 +58,7 @@ public class LanguageServiceTests
         bool result = _service.IsValidLanguage(null);
 
         // Assert
-        result.Should().BeFalse();
+        Assert.False(result);
     }
 
     [Fact]
@@ -72,6 +71,6 @@ public class LanguageServiceTests
         string availableLanguages = _service.AvailableLanguages;
 
         // Assert
-        availableLanguages.Should().Be(expectedLanguages);
+        Assert.Equal(expectedLanguages, availableLanguages);
     }
 }

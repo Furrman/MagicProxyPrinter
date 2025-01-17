@@ -1,11 +1,9 @@
-using FluentAssertions;
 using Moq;
 
 using Domain;
 using Domain.IO;
 using Domain.Services;
 using Domain.Models.DTO;
-using Domain.Factories;
 using Domain.Strategies;
 
 namespace UnitTests.Domain;
@@ -89,9 +87,9 @@ public class MagicProxyPrinterTests
             => x.GenerateWord(It.IsAny<DeckDetailsDTO>(), It.IsAny<string>(), 
                 It.IsAny<string>(), saveImages), Times.Once);
     }
-
+    
     [Fact]
-    public void GenerateWord_WithInvalidArguments_ThrowsArgumentException()
+    public async Task GenerateWord_WithInvalidArguments_ThrowsArgumentException()
     {
         // Arrange
         string? deckUrl = null;
@@ -103,12 +101,11 @@ public class MagicProxyPrinterTests
         bool printAllTokens = true;
         bool saveImages = true;
 
-        // Act
-        Func<Task> act = async () => await _proxyPrinter.GenerateWord(deckUrl, inputFilePath, outputPath, 
-            outputFileName, languageCode, tokenCopies, printAllTokens, saveImages);
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(async () => 
+            await _proxyPrinter.GenerateWord(deckUrl, inputFilePath, outputPath, 
+                outputFileName, languageCode, tokenCopies, printAllTokens, saveImages));
         
-        // Assert
-        act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("Wrong input parameters to download deck.");
+        Assert.Equal("Wrong input parameters to download deck.", exception.Message);
     }
 }

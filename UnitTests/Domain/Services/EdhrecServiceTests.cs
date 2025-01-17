@@ -1,11 +1,8 @@
 using Microsoft.Extensions.Logging;
 
-using FluentAssertions;
 using Moq;
 
 using Domain.Clients;
-using Domain.Factories;
-using Domain.Models.DTO;
 using Domain.Services;
 
 namespace UnitTests.Domain.Services;
@@ -39,8 +36,8 @@ public class EdhrecServiceTests
         bool result = _service.TryExtractRelativePath(url, out string deckId);
 
         // Assert
-        result.Should().BeTrue();
-        deckId.Should().Be(expectedDeckId);
+        Assert.True(result);
+        Assert.Equal(expectedDeckId, deckId);
     }
 
     [Theory]
@@ -57,8 +54,8 @@ public class EdhrecServiceTests
         bool result = _service.TryExtractRelativePath(url, out string deckId);
 
         // Assert
-        result.Should().BeFalse();
-        deckId.Should().Be(string.Empty);
+        Assert.False(result);
+        Assert.Equal(string.Empty, deckId);
     }
 
     [Fact]
@@ -72,7 +69,7 @@ public class EdhrecServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
+        Assert.NotNull(result);
     }
     
     [Fact]
@@ -82,23 +79,23 @@ public class EdhrecServiceTests
         string deckUrl = "https://edhrec.com/deckpreview/7VNuM_Ce5b3JbQrhfTsObA";
         _edhrecClientMock.Setup(x => x.GetCardsInHtml(It.IsAny<string>())).ReturnsAsync("""
             <html lang="en">
-            	<body>
-            		<div id="__next">
-            			<main class="Main_main__Kkd1U">
-            				<div class="Leaderboard_container__2JclS">
-            					<div class="Leaderboard_leaderboard__5X5XE">
-            						<div class="lazyload-wrapper h-100">
-            							<div class="lazyload-placeholder"/>
-            						</div>
-            					</div>
-            					<div class="mvLeaderboard"/>
-            				</div>
-            				<div class="d-flex flex-grow-1 p-3 pe-lg-0">
-            					<div class="d-flex w-100">
-            						<div class="Main_left__B9nka">
-            							<div class="Container_container__A7FAx">
-            								<div class="CoolHeader_container__MASgl card shadow-sm">
-            									<h3 class="m-2">Deck with Commodore Guff</h3>
+                <body>
+                    <div id="__next">
+                        <main class="Main_main__Kkd1U">
+                            <div class="Leaderboard_container__2JclS">
+                                <div class="Leaderboard_leaderboard__5X5XE">
+                                    <div class="lazyload-wrapper h-100">
+                                        <div class="lazyload-placeholder"/>
+                                    </div>
+                                </div>
+                                <div class="mvLeaderboard"/>
+                            </div>
+                            <div class="d-flex flex-grow-1 p-3 pe-lg-0">
+                                <div class="d-flex w-100">
+                                    <div class="Main_left__B9nka">
+                                        <div class="Container_container__A7FAx">
+                                            <div class="CoolHeader_container__MASgl card shadow-sm">
+                                                <h3 class="m-2">Deck with Commodore Guff</h3>
                                             </div>
                                         </div>
                                     </div>
@@ -114,8 +111,8 @@ public class EdhrecServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Name.Should().Be("Deck with Commodore Guff");
+        Assert.NotNull(result);
+        Assert.Equal("Deck with Commodore Guff", result!.Name);
     }
 
     [Fact]
@@ -174,11 +171,11 @@ public class EdhrecServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Cards[0].Should().NotBeNull();
-        result.Cards[0].Name.Should().Be("Arena Rector");
+        Assert.NotNull(result);
+        Assert.NotNull(result!.Cards[0]);
+        Assert.Equal("Arena Rector", result.Cards[0].Name);
         // Quantity in EDHRec should be 1 by default
-        result.Cards[0].Quantity.Should().Be(1);
+        Assert.Equal(1, result.Cards[0].Quantity);
     }
     
     [Fact]
@@ -220,8 +217,8 @@ public class EdhrecServiceTests
         var (link, html) = await _service.GetOriginalDeckLink(deckUrl);
 
         // Assert
-        link.Should().NotBeNull();
-        link.Should().Be("https://archidekt.com/decks/9146588?utm_source=edhrec&utm_medium=deck_summary");
+        Assert.NotNull(link);
+        Assert.Equal("https://archidekt.com/decks/9146588?utm_source=edhrec&utm_medium=deck_summary", link);
     }
     
     [Fact]
@@ -263,7 +260,7 @@ public class EdhrecServiceTests
         var (link, html) = await _service.GetOriginalDeckLink(deckUrl);
 
         // Assert
-        link.Should().NotBeNull();
-        link.Should().Be("https://moxfield.com/decks/nZ2YLfU3J0KpYpsMsYHIRQ?utm_source=edhrec&utm_medium=deck_summary");
+        Assert.NotNull(link);
+        Assert.Equal("https://moxfield.com/decks/nZ2YLfU3J0KpYpsMsYHIRQ?utm_source=edhrec&utm_medium=deck_summary", link);
     }
 }

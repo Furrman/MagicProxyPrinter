@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 
-using FluentAssertions;
 using Moq;
 
 using Domain.Clients;
@@ -33,8 +32,8 @@ public class MoxfieldServiceTests
         bool result = _service.TryExtractDeckIdFromUrl(url, out string deckId);
 
         // Assert
-        result.Should().BeTrue();
-        deckId.Should().Be(expectedId);
+        Assert.True(result);
+        Assert.Equal(expectedId, deckId);
     }
 
     [Theory]
@@ -47,8 +46,8 @@ public class MoxfieldServiceTests
         bool result = _service.TryExtractDeckIdFromUrl(url, out string relatedPath);
 
         // Assert
-        result.Should().BeFalse();
-        relatedPath.Should().Be(string.Empty);
+        Assert.False(result);
+        Assert.Equal(string.Empty, relatedPath);
     }
 
     [Fact]
@@ -62,7 +61,7 @@ public class MoxfieldServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
+        Assert.NotNull(result);
     }
     
     [Fact]
@@ -79,8 +78,8 @@ public class MoxfieldServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Name.Should().Be("Test Deck");
+        Assert.NotNull(result);
+        Assert.Equal("Test Deck", result!.Name);
     }
 
     [Fact]
@@ -116,10 +115,10 @@ public class MoxfieldServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Cards[0].Should().NotBeNull();
-        result.Cards[0].Id.Should().Be(cardId);
-        result.Cards[0].Name.Should().Be("Test Card 1");
-        result.Cards[0].Quantity.Should().Be(2);
+        Assert.NotNull(result);
+        Assert.NotNull(result!.Cards[0]);
+        Assert.Equal(cardId, result.Cards[0].Id);
+        Assert.Equal("Test Card 1", result.Cards[0].Name);
+        Assert.Equal(2, result.Cards[0].Quantity);
     }
 }

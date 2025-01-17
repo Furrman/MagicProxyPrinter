@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 
-using FluentAssertions;
 using Moq;
 
 using Domain.Clients;
@@ -33,8 +32,8 @@ public class ArchidektServiceTests
         bool result = _service.TryExtractDeckIdFromUrl(url, out int deckId);
 
         // Assert
-        result.Should().BeTrue();
-        deckId.Should().Be(expectedDeckId);
+        Assert.True(result);
+        Assert.Equal(expectedDeckId, deckId);
     }
 
     [Theory]
@@ -47,8 +46,8 @@ public class ArchidektServiceTests
         bool result = _service.TryExtractDeckIdFromUrl(url, out int deckId);
 
         // Assert
-        result.Should().BeFalse();
-        deckId.Should().Be(0);
+        Assert.False(result);
+        Assert.Equal(0, deckId);
     }
 
     [Fact]
@@ -68,13 +67,13 @@ public class ArchidektServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Name.Should().Be("Test Deck");
-        result.Cards.Should().HaveCount(2);
-        result.Cards[0].Name.Should().Be("Card 1");
-        result.Cards[0].Quantity.Should().Be(2);
-        result.Cards[1].Name.Should().Be("Card 2");
-        result.Cards[1].Quantity.Should().Be(3);
+        Assert.NotNull(result);
+        Assert.Equal("Test Deck", result!.Name);
+        Assert.Equal(2, result.Cards.Count);
+        Assert.Equal("Card 1", result.Cards[0].Name);
+        Assert.Equal(2, result.Cards[0].Quantity);
+        Assert.Equal("Card 2", result.Cards[1].Name);
+        Assert.Equal(3, result.Cards[1].Quantity);
     }
 
     [Fact]
@@ -89,7 +88,7 @@ public class ArchidektServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().BeNull();
+        Assert.Null(result);
     }
 
     [Fact]
@@ -105,8 +104,8 @@ public class ArchidektServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Cards.Should().BeEmpty();
+        Assert.NotNull(result);
+        Assert.Empty(result!.Cards);
     }
 
     [Fact]
@@ -122,8 +121,8 @@ public class ArchidektServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Cards.Should().BeEmpty();
+        Assert.NotNull(result);
+        Assert.Empty(result!.Cards);
     }
     
     [Fact]
@@ -139,9 +138,9 @@ public class ArchidektServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Cards.Should().HaveCount(1);
-        result.Cards[0].Art.Should().BeTrue();
+        Assert.NotNull(result);
+        Assert.Single(result!.Cards);
+        Assert.True(result.Cards[0].Art);
     }
 
     [Fact]
@@ -157,9 +156,9 @@ public class ArchidektServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Cards.Should().HaveCount(1);
-        result.Cards[0].Etched.Should().BeTrue();
+        Assert.NotNull(result);
+        Assert.Single(result!.Cards);
+        Assert.True(result.Cards[0].Etched);
     }
 
     [Fact]
@@ -175,8 +174,8 @@ public class ArchidektServiceTests
         var result = await _service.RetrieveDeckFromWeb(deckUrl);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Cards.Should().HaveCount(1);
-        result.Cards[0].Foil.Should().BeTrue();
+        Assert.NotNull(result);
+        Assert.Single(result!.Cards);
+        Assert.True(result.Cards[0].Foil);
     }
 }

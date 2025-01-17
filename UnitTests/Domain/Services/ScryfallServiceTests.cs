@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 
-using FluentAssertions;
 using Moq;
 
 using Domain.Clients;
@@ -91,10 +90,10 @@ public class ScryfallServiceTests
     public async Task UpdateCardImageLinks_WhenCardsAreProvided_ShouldSetCardImageLinks()
     {
         // Arrange
-        List<CardEntryDTO> cards =
-        [
+        List<CardEntryDTO> cards = new List<CardEntryDTO>
+        {
             new() { Name = "Card 1" }
-        ];
+        };
 
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
             .ReturnsAsync(new CardSearchDTO()
@@ -107,7 +106,7 @@ public class ScryfallServiceTests
 
         // Assert
         _scryfallClientMock.Verify(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Once);
-        cards[0].CardSides.First().ImageUrl.Should().Be("https://example.com/card1.jpg");
+        Assert.Equal("https://example.com/card1.jpg", cards[0].CardSides.First().ImageUrl);
     }
 
     [Fact]
@@ -127,7 +126,7 @@ public class ScryfallServiceTests
 
         // Assert
         _scryfallClientMock.Verify(api => api.GetCard(It.IsAny<Guid>()), Times.Once);
-        cards[0].CardSides.First().ImageUrl.Should().Be("https://example.com/card1.jpg");
+        Assert.Equal("https://example.com/card1.jpg", cards[0].CardSides.First().ImageUrl);
     }
 
     [Fact]
@@ -147,31 +146,33 @@ public class ScryfallServiceTests
 
         // Assert
         _scryfallClientMock.Verify(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Once);
-        cards[0].CardSides.Should().BeEmpty();
+        Assert.Empty(cards[0].CardSides);
     }
 
     [Fact]
     public async Task UpdateCardImageLinks_WhenCardIsDualSide_ShouldUpdateBothPagesCardImageLinks()
     {
         // Arrange
-        List<CardEntryDTO> cards =
-        [
+        List<CardEntryDTO> cards = new List<CardEntryDTO>
+        {
             new() { Name = "Card 1" }
-        ];
+        };
 
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
             .ReturnsAsync(new CardSearchDTO()
             {
-                Data = [
-                    new CardDataDTO 
-                    { 
-                        Name = "Card 1", 
-                        CardFaces =
-                        [
-                            new CardFaceDTO () { Name = "Front", ImageUriData = new CardImageUriDTO() { Large = "https://example.com/card1.jpg" } },
-                            new CardFaceDTO () { Name = "Back", ImageUriData = new CardImageUriDTO() { Large = "https://example.com/card1-back.jpg" } }
-                        ]}
-                ]
+            Data =
+            [
+                new CardDataDTO 
+                { 
+                    Name = "Card 1", 
+                    CardFaces =
+                    [
+                        new CardFaceDTO () { Name = "Front", ImageUriData = new CardImageUriDTO() { Large = "https://example.com/card1.jpg" } },
+                        new CardFaceDTO () { Name = "Back", ImageUriData = new CardImageUriDTO() { Large = "https://example.com/card1-back.jpg" } }
+                    ]
+                }
+            ]
             });
 
         // Act
@@ -179,22 +180,24 @@ public class ScryfallServiceTests
 
         // Assert
         _scryfallClientMock.Verify(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Once);
-        cards[0].CardSides.Should().NotBeEmpty().And.HaveCount(2);
+        Assert.NotEmpty(cards[0].CardSides);
+        Assert.Equal(2, cards[0].CardSides.Count);
     }
 
     [Fact]
     public async Task UpdateCardImageLinks_WhenCardIsArt_ShouldUpdateFirstPageCardImageLink()
     {
         // Arrange
-        List<CardEntryDTO> cards =
-        [
+        List<CardEntryDTO> cards = new List<CardEntryDTO>
+        {
             new() { Name = "Card 1", Art = true }
-        ];
+        };
 
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
             .ReturnsAsync(new CardSearchDTO()
             {
-                Data = [
+                Data =
+                [
                     new CardDataDTO 
                     { 
                         Name = "Card 1", 
@@ -211,24 +214,25 @@ public class ScryfallServiceTests
 
         // Assert
         _scryfallClientMock.Verify(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Once);
-        cards[0].CardSides.Should().NotBeEmpty()
-            .And.HaveCount(1)
-            .And.ContainSingle(cs => cs.ImageUrl == "https://example.com/card1.jpg");
+        Assert.NotEmpty(cards[0].CardSides);
+        Assert.Single(cards[0].CardSides);
+        Assert.Equal("https://example.com/card1.jpg", cards[0].CardSides.First().ImageUrl);
     }
 
     [Fact]
     public async Task UpdateCardImageLinks_WhenTokenCopyNumberSpecified_ShouldAddTokens()
     {
         // Arrange
-        List<CardEntryDTO> cards =
-        [
+        List<CardEntryDTO> cards = new List<CardEntryDTO>
+        {
             new() { Name = "Card 1" }
-        ];
+        };
 
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
             .ReturnsAsync(new CardSearchDTO()
             {
-                Data = [
+                Data =
+                [
                     new CardDataDTO
                     {
                         Name = "Card 1", 
@@ -241,8 +245,9 @@ public class ScryfallServiceTests
         await _service.UpdateCardImageLinks(cards, tokenCopies: 1);
 
         // Assert
-        cards[0].Tokens.Should().HaveCount(1)
-            .And.ContainSingle(cs => cs.Uri == "https://example.com/card1-token.jpg" && cs.Name == "Card 1 Token");
+        Assert.Single(cards[0].Tokens);
+        Assert.Equal("https://example.com/card1-token.jpg", cards[0].Tokens.First().Uri);
+        Assert.Equal("Card 1 Token", cards[0].Tokens.First().Name);
     }
 
     [Fact]
@@ -257,7 +262,8 @@ public class ScryfallServiceTests
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
             .ReturnsAsync(new CardSearchDTO()
             {
-                Data = [
+                Data =
+                [
                     new CardDataDTO
                     {
                         Name = "Card 1", 
@@ -270,23 +276,24 @@ public class ScryfallServiceTests
         await _service.UpdateCardImageLinks(cards);
 
         // Assert
-        cards[0].Tokens.Should().BeEmpty();
+        Assert.Empty(cards[0].Tokens);
     }
 
     [Fact]
     public async Task UpdateCardImageLinks_WhenTokenCopyNumberSpecified_ShouldAddTokensSpecifiedNumberOfTimesToOtherCardsForPrinting()
     {
         // Arrange
-        List<CardEntryDTO> cards =
-        [
+        List<CardEntryDTO> cards = new List<CardEntryDTO>
+        {
             new() { Name = "Card 1" }
-        ];
+        };
         var tokenId = Guid.NewGuid();
 
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
             .ReturnsAsync(new CardSearchDTO()
             {
-                Data = [
+                Data =
+                [
                     new CardDataDTO
                     {
                         Name = "Card 1", 
@@ -301,23 +308,27 @@ public class ScryfallServiceTests
         await _service.UpdateCardImageLinks(cards, tokenCopies: 3);
 
         // Assert
-        cards.Should().Contain(c => c.Name == "Card 1 Token" && c.Quantity == 3 && c.CardSides.First().ImageUrl == "https://example.com/card1-token.jpg");
+        var tokenCard = cards.FirstOrDefault(c => c.Name == "Card 1 Token");
+        Assert.NotNull(tokenCard);
+        Assert.Equal(3, tokenCard.Quantity);
+        Assert.Equal("https://example.com/card1-token.jpg", tokenCard.CardSides.First().ImageUrl);
     }
 
     [Fact]
     public async Task UpdateCardImageLinks_WhenTokenCopyNumberNotSpecified_ShouldNotAddAnyTokensToOtherCardsForPrinting()
     {
         // Arrange
-        List<CardEntryDTO> cards =
-        [
+        List<CardEntryDTO> cards = new List<CardEntryDTO>
+        {
             new() { Name = "Card 1" }
-        ];
+        };
         var tokenId = Guid.NewGuid();
 
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
             .ReturnsAsync(new CardSearchDTO()
             {
-                Data = [
+                Data =
+                [
                     new CardDataDTO
                     {
                         Name = "Card 1", 
@@ -332,23 +343,24 @@ public class ScryfallServiceTests
         await _service.UpdateCardImageLinks(cards);
 
         // Assert
-        cards.Should().NotContain(c => c.Name == "Card 1 Token" && c.Quantity == 3 && c.CardSides.First().ImageUrl == "https://example.com/card1-token.jpg");
+        Assert.DoesNotContain(cards, c => c.Name == "Card 1 Token" && c.Quantity == 3 && c.CardSides.First().ImageUrl == "https://example.com/card1-token.jpg");
     }
     
     [Fact]
     public async Task UpdateCardImageLinks_WhenTokenCopyNumberSpecifiedAndGroupingTokensSet_ShouldNotAddTheSameTokenMoreTimesThanSpecified()
     {
         // Arrange
-        List<CardEntryDTO> cards =
-        [
+        List<CardEntryDTO> cards = new List<CardEntryDTO>
+        {
             new() { Name = "Card 1" },
             new() { Name = "Card 2" }
-        ];
+        };
         var tokenId = Guid.NewGuid();
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
             .ReturnsAsync(new CardSearchDTO()
             {
-                Data = [
+                Data =
+                [
                     new CardDataDTO
                     {
                         Name = "Card 1", 
@@ -368,23 +380,26 @@ public class ScryfallServiceTests
         await _service.UpdateCardImageLinks(cards, tokenCopies: 1, groupTokens: true);
 
         // Assert
-        cards.Should().ContainSingle(card => card.Name == "Token" && card.Quantity == 1);
+        var tokenCard = cards.FirstOrDefault(card => card.Name == "Token");
+        Assert.NotNull(tokenCard);
+        Assert.Equal(1, tokenCard.Quantity);
     }
     
     [Fact]
     public async Task UpdateCardImageLinks_WhenTokenCopyNumberSpecifiedAndGroupingTokensUnset_ShouldAddTheSameTokenMoreTimesThanSpecified()
     {
         // Arrange
-        List<CardEntryDTO> cards =
-        [
+        List<CardEntryDTO> cards = new List<CardEntryDTO>
+        {
             new() { Name = "Card 1" },
             new() { Name = "Card 2" }
-        ];
+        };
         var tokenId = Guid.NewGuid();
         _scryfallClientMock.Setup(api => api.SearchCard(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
             .ReturnsAsync(new CardSearchDTO()
             {
-                Data = [
+                Data =
+                [
                     new CardDataDTO
                     {
                         Name = "Card 1", 
@@ -404,6 +419,6 @@ public class ScryfallServiceTests
         await _service.UpdateCardImageLinks(cards, tokenCopies: 1, groupTokens: false);
 
         // Assert
-        cards.Where(card => card.Name == "Token").Should().HaveCount(2);
+        Assert.Equal(2, cards.Count(card => card.Name == "Token"));
     }
 }
