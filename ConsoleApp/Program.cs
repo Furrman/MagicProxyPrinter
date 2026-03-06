@@ -1,12 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-
 using CoconoaApp = Cocona.CoconaLiteApp;
 using CoconoaOptions = Cocona.OptionAttribute;
-
 using Domain;
 using Domain.Services;
 using Domain.Models.Events;
-
 using ConsoleApp.Configuration;
 using ConsoleApp.Helpers;
 
@@ -35,7 +32,7 @@ internal class Program
                 - url to your deck.
                 
                 Use --help to see more information.");
-                return;
+                return -1;
             }
 
             var languageService = serviceProvider.GetService<ILanguageService>()!;
@@ -43,18 +40,18 @@ internal class Program
             {
                 ConsoleUtility.WriteErrorMessage("You have to specify correct language code.");
                 ConsoleUtility.WriteErrorMessage($"Language codes: {languageService.AvailableLanguages}");
-                return;
+                return -1;
             }
 
             if (tokenCopies <= 0)
             {
                 ConsoleUtility.WriteErrorMessage("Number of copies for each token has to be greater than 0.");
-                return;
+                return -1;
             }
             if (tokenCopies > 100)
             {
                 ConsoleUtility.WriteErrorMessage("Number of copies for each token has to be less than 100.");
-                return;
+                return -1;
             }
 
             var archidektPrinter = serviceProvider.GetService<IMagicProxyPrinter>()!;
@@ -68,6 +65,7 @@ internal class Program
                 groupTokens,
                 includeEmblems,
                 storeOriginalImages).Wait();
+            return 0;
         });
     }
 
