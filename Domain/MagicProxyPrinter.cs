@@ -23,13 +23,22 @@ public interface IMagicProxyPrinter
     /// <param name="outputDirPath">The path to folder for output files. If null, the document will be saved in the default output directory.</param>
     /// <param name="outputFileName">The name of the generated Word document. If null, a default name will be used.</param>
     /// <param name="languageCode">The language code to be used for generating the Word document. If null, the default language code will be used.</param>
+    /// <param name="setCode">The code defining magic set which will be used to search for specific card versions. If null, the first matching card will be returned.</param>
     /// <param name="tokenCopies">Number of copies for each token added to document. Default is 0.</param>
     /// <param name="groupTokens">Group tokens based on the name. Default is false.</param>
     /// <param name="includeEmblems">Include emblems to documents. Default is false.</param>
     /// <param name="saveImages">Specifies whether to save card images in the document. Default is false.</param>
     /// <returns>A task representing the asynchronous generation process.</returns>
-    Task GenerateWord(string? deckUrl = null, string? inputFilePath = null, string? outputDirPath = null, string? outputFileName = null, 
-        string? languageCode = null, int tokenCopies = 0, bool groupTokens = false, bool includeEmblems = false, bool saveImages = false);
+    Task GenerateWord(string? deckUrl = null, 
+        string? inputFilePath = null, 
+        string? outputDirPath = null, 
+        string? outputFileName = null, 
+        string? languageCode = null,
+        string? setCode = null,
+        int tokenCopies = 0,
+        bool groupTokens = false,
+        bool includeEmblems = false,
+        bool saveImages = false);
 
     /// <summary>
     /// Generates a Word document from the specified deck ID stored in the internet.
@@ -39,12 +48,20 @@ public interface IMagicProxyPrinter
     /// <param name="outputFileName">The name of the generated Word document. If null, a default name will be used.</param>
     /// <param name="languageCode">The language code to be used for generating the Word document. If null, the default language code will be used.</param>
     /// <param name="tokenCopies">Number of copies for each token added to document. Default is 0.</param>
+    /// <param name="setCode">The code defining magic set which will be used to search for specific card versions. If null, the first matching card will be returned.</param>
     /// <param name="groupTokens">Group tokens based on the name. Default is false.</param>
     /// <param name="includeEmblems">Include emblems to documents. Default is false.</param>
     /// <param name="saveImages">Specifies whether to save card images in the document. Default is false.</param>
     /// <returns>A task representing the asynchronous generation process.</returns>
-    Task GenerateWordFromDeckOnline(string deckUrl, string? outputDirPath = null, string? outputFileName = null, 
-        string? languageCode = null, int tokenCopies = 0, bool groupTokens = false, bool includeEmblems = false, bool saveImages = false);
+    Task GenerateWordFromDeckOnline(string deckUrl,
+        string? outputDirPath = null,
+        string? outputFileName = null,
+        string? languageCode = null,
+        string? setCode = null,
+        int tokenCopies = 0,
+        bool groupTokens = false,
+        bool includeEmblems = false,
+        bool saveImages = false);
 
     /// <summary>
     /// Generates a Word document from the specified deck list file.
@@ -57,8 +74,14 @@ public interface IMagicProxyPrinter
     /// <param name="saveImages">Specifies whether to save card images in the document. Default is false.</param>
     /// <param name="includeEmblems">Include emblems to documents. Default is false.</param>
     /// <returns>A task representing the asynchronous generation process.</returns>
-    Task GenerateWordFromDeckInFile(string deckListFilePath, string? outputDirPath = null, string? outputFileName = null, 
-        string? languageCode = null, int tokenCopies = 0, bool groupTokens = false, bool includeEmblems = false, bool saveImages = false);
+    Task GenerateWordFromDecFromFile(string deckListFilePath,
+        string? outputDirPath = null,
+        string? outputFileName = null,
+        string? languageCode = null,
+        int tokenCopies = 0,
+        bool groupTokens = false,
+        bool includeEmblems = false,
+        bool saveImages = false);
 }
 
 public class MagicProxyPrinter : IMagicProxyPrinter
@@ -95,15 +118,16 @@ public class MagicProxyPrinter : IMagicProxyPrinter
         string? outputDirPath = null, 
         string? outputFileName = null,
         string? languageCode = null,
+        string? setCode = null,
         int tokenCopies = 0, 
         bool groupTokens = false,
         bool includeEmblems = false,
         bool saveImages = false)
     {
         if (deckUrl != null) await GenerateWordFromDeckOnline(deckUrl, outputDirPath, outputFileName, 
-            languageCode, tokenCopies, groupTokens, includeEmblems: includeEmblems, saveImages: saveImages);
-        else if (inputFilePath != null) await GenerateWordFromDeckInFile(inputFilePath, outputDirPath, outputFileName, 
-            languageCode, tokenCopies, groupTokens, includeEmblems: includeEmblems, saveImages: saveImages);
+            languageCode, setCode, tokenCopies, groupTokens, includeEmblems, saveImages);
+        else if (inputFilePath != null) await GenerateWordFromDecFromFile(inputFilePath, outputDirPath, outputFileName, 
+            languageCode, tokenCopies, groupTokens, includeEmblems, saveImages);
         else throw new ArgumentException("Wrong input parameters to download deck.");
     }
 
@@ -112,6 +136,7 @@ public class MagicProxyPrinter : IMagicProxyPrinter
         string? outputDirPath = null, 
         string? outputFileName = null, 
         string? languageCode = null,
+        string? setCode = null,
         int tokenCopies = 0, 
         bool groupTokens = false,
         bool includeEmblems = false,
@@ -129,7 +154,7 @@ public class MagicProxyPrinter : IMagicProxyPrinter
         await _wordGeneratorService.GenerateWord(deck, outputFileName, outputDirPath, saveImages);
     }
 
-    public async Task GenerateWordFromDeckInFile(
+    public async Task GenerateWordFromDecFromFile(
         string deckListFilePath, 
         string? outputDirPath = null, 
         string? outputFileName = null, 

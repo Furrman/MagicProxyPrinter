@@ -11,17 +11,19 @@ namespace ConsoleApp;
 
 internal class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         var serviceProvider = DependencyInjectionConfigurator.Setup();
 
-        CoconoaApp.Run(([CoconoaOptions(Description = "Filepath to exported deck")] string? deckFilePath,
+        await CoconoaApp.RunAsync(async (
+            [CoconoaOptions(Description = "Filepath to exported deck")] string? deckFilePath,
             [CoconoaOptions(Description = "URL link to deck")]string? deckUrl,
             [CoconoaOptions(Description = "Set language for all cards to print")] string? languageCode = null,
             [CoconoaOptions(Description = "Number of copy for each token")] int? tokenCopies = null,
             [CoconoaOptions(Description = "Group tokens based on the name")] bool groupTokens = false,
             [CoconoaOptions(Description = "Directory path to output file(s)")]string? outputPath = null,
             [CoconoaOptions(Description = "Filename of the output word file")]string? outputFileName = null,
+            [CoconoaOptions(Description = "Set code used to search for specific version of card")]string? setCode = null,
             [CoconoaOptions(Description = "Include emblems attached to a cards into output document")] bool includeEmblems = false,
             [CoconoaOptions(Description = "Flag to store original images in the same folder as output file")] bool storeOriginalImages = false) =>
         {
@@ -58,15 +60,16 @@ You have to provide at least one from this list:
 
             var magicProxyPrinter = serviceProvider.GetService<IMagicProxyPrinter>()!;
             magicProxyPrinter.ProgressUpdate += UpdateProgressOnConsole;
-            magicProxyPrinter.GenerateWord(deckUrl, 
+            await magicProxyPrinter.GenerateWord(deckUrl, 
                 deckFilePath, 
                 outputPath, 
                 outputFileName, 
                 languageCode,
+                setCode,
                 tokenCopies ?? 0,
                 groupTokens,
                 includeEmblems,
-                storeOriginalImages).Wait();
+                storeOriginalImages);
             return 0;
         });
     }

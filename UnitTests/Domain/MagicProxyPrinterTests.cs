@@ -51,7 +51,8 @@ public class MagicProxyPrinterTests
             .ReturnsAsync(new DeckDetailsDTO());
 
         // Act
-        await _proxyPrinter.GenerateWord(deckUrl, null, outputPath, outputFileName, languageCode, tokenCopies, printAllTokens, saveImages: saveImages);
+        await _proxyPrinter.GenerateWord(deckUrl, null, outputPath, outputFileName, languageCode,
+            tokenCopies: tokenCopies, includeEmblems: printAllTokens, saveImages: saveImages);
 
         // Assert
         _deckRetrieveStrategyMock.Verify(x => x.GetDeck(It.IsAny<string>()), Times.Once);
@@ -76,7 +77,7 @@ public class MagicProxyPrinterTests
 
         // Act
         await _proxyPrinter.GenerateWord(null, inputFilePath, outputPath, outputFileName, languageCode, 
-            tokenCopies, printAllTokens, saveImages: saveImages);
+            tokenCopies: tokenCopies, includeEmblems: printAllTokens, saveImages: saveImages);
 
         // Assert
         _fileParserMock.Verify(x => x.GetDeckFromFile(inputFilePath), Times.Once);
@@ -104,7 +105,8 @@ public class MagicProxyPrinterTests
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ArgumentException>(async () => 
             await _proxyPrinter.GenerateWord(deckUrl, inputFilePath, outputPath, 
-                outputFileName, languageCode, tokenCopies, printAllTokens, saveImages));
+                outputFileName, languageCode, tokenCopies: tokenCopies, includeEmblems: printAllTokens, 
+                saveImages: saveImages));
         
         Assert.Equal("Wrong input parameters to download deck.", exception.Message);
     }
