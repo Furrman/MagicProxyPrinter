@@ -27,6 +27,7 @@ If so, then this application is for you! It allows you to generate a printable a
 - Moxfield
 - EDHRec
 - MTGGoldFish
+- CubeCobra
 
 ## Plans
 
