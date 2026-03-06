@@ -25,13 +25,15 @@ internal class Program
             [CoconoaOptions(Description = "Include emblems attached to a cards into output document")] bool includeEmblems = false,
             [CoconoaOptions(Description = "Flag to store original images in the same folder as output file")] bool storeOriginalImages = false) =>
         {
-            if (deckUrl is null && deckUrl is null)
+            if (deckFilePath is null && deckUrl is null)
             {
-                ConsoleUtility.WriteErrorMessage(@"You have to provide at least one from this list:
-                - path to exported deck
-                - url to your deck.
-                
-                Use --help to see more information.");
+                ConsoleUtility.WriteErrorMessage("""
+                                                 You have to provide at least one from this list:
+                                                                 - path to exported deck
+                                                                 - url to your deck.
+                                                                 
+                                                                 Use --help to see more information.
+                                                 """);
                 return -1;
             }
 
@@ -54,9 +56,9 @@ internal class Program
                 return -1;
             }
 
-            var archidektPrinter = serviceProvider.GetService<IMagicProxyPrinter>()!;
-            archidektPrinter.ProgressUpdate += UpdateProgressOnConsole;
-            archidektPrinter.GenerateWord(deckUrl, 
+            var magicProxyPrinter = serviceProvider.GetService<IMagicProxyPrinter>()!;
+            magicProxyPrinter.ProgressUpdate += UpdateProgressOnConsole;
+            magicProxyPrinter.GenerateWord(deckUrl, 
                 deckFilePath, 
                 outputPath, 
                 outputFileName, 
@@ -77,8 +79,9 @@ internal class Program
             {
                 var stageInfo = e.Stage switch
                 {
-                    CreateMagicDeckDocumentStageEnum.GetDeckDetails => "(1/2) Get deck details",
-                    CreateMagicDeckDocumentStageEnum.SaveToDocument => "(2/2) Download images",
+                    CreateMagicDeckDocumentStageEnum.GetDeckDetails => "(1/3) Get deck details",
+                    CreateMagicDeckDocumentStageEnum.DownloadImages => "(2/3) Download images",
+                    CreateMagicDeckDocumentStageEnum.GenerateDocument => "(3/3) Generate document",
                     _ => string.Empty
                 };
                 ConsoleUtility.WriteInNewLine(stageInfo);

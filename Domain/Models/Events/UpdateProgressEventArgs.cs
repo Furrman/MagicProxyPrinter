@@ -2,13 +2,14 @@
 
 public class UpdateProgressEventArgs : EventArgs
 {
-    public CreateMagicDeckDocumentStageEnum Stage { get; set; }
-    public double? Percent { get; set; }
-    public string? ErrorMessage { get; set; }
+    public CreateMagicDeckDocumentStageEnum Stage { get; init; }
+    public double? Percent { get; init; }
+    public string? ErrorMessage { get; init; }
 }
 
 public enum CreateMagicDeckDocumentStageEnum
 {
     GetDeckDetails,
-    SaveToDocument
+    DownloadImages,
+    GenerateDocument
 }

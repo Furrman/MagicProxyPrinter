@@ -2,6 +2,6 @@
 
 public class GetDeckDetailsProgressEventArgs : EventArgs
 {
-    public double? Percent { get; set; }
-    public string? ErrorMessage { get; set; }
+    public double? Percent { get; init; }
+    public string? ErrorMessage { get; init; }
 }

@@ -1,5 +1,4 @@
-﻿using Domain.Factories;
-using Domain.IO;
+﻿using Domain.IO;
 using Domain.Models.Events;
 using Domain.Services;
 using Domain.Strategies;
@@ -86,6 +85,7 @@ public class MagicProxyPrinter : IMagicProxyPrinter
         _wordGeneratorService = wordGeneratorService;
 
         _scryfallService.GetDeckDetailsProgress += UpdateGetDeckDetails;
+        _wordGeneratorService.DownloadImagesProgress += UpdateDownloadImages;
         _wordGeneratorService.GenerateWordProgress += UpdateGenerateWord;
     }
 
@@ -171,11 +171,21 @@ public class MagicProxyPrinter : IMagicProxyPrinter
         });
     }
 
-    private void UpdateGenerateWord(object? sender, GenerateWordProgressEventArgs e)
+    private void UpdateDownloadImages(object? sender, DownloadImagesProgressEventArgs e)
     {
         ProgressUpdate?.Invoke(this, new UpdateProgressEventArgs
         {
-            Stage = CreateMagicDeckDocumentStageEnum.SaveToDocument,
+            Stage = CreateMagicDeckDocumentStageEnum.DownloadImages,
+            Percent = e.Percent,
+            ErrorMessage = e.ErrorMessage
+        });
+    }
+    
+    private void UpdateGenerateWord(object? sender, GenerateDocumentProgressEventArgs e)
+    {
+        ProgressUpdate?.Invoke(this, new UpdateProgressEventArgs
+        {
+            Stage = CreateMagicDeckDocumentStageEnum.GenerateDocument,
             Percent = e.Percent,
             ErrorMessage = e.ErrorMessage
         });

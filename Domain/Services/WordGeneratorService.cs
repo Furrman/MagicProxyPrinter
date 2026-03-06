@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-
 using DocumentFormat.OpenXml.Wordprocessing;
 using OfficeIMO.Word;
-
 using Domain.Constants;
 using Domain.Clients;
 using Domain.Models.DTO;
@@ -17,9 +15,13 @@ namespace Domain.Services;
 public interface IWordGeneratorService
 {
     /// <summary>
+    /// Event that is raised to report the progress of the images download.
+    /// </summary>
+    event EventHandler<DownloadImagesProgressEventArgs>? DownloadImagesProgress;
+    /// <summary>
     /// Event that is raised to report the progress of the word generation.
     /// </summary>
-    event EventHandler<GenerateWordProgressEventArgs>? GenerateWordProgress;
+    event EventHandler<GenerateDocumentProgressEventArgs>? GenerateWordProgress;
 
     /// <summary>
     /// Generates a Word document based on the provided deck details.
@@ -35,7 +37,8 @@ public interface IWordGeneratorService
 public class WordGeneratorService(ILogger<WordGeneratorService> logger, IScryfallClient scryfallClient, IWordDocumentWrapper wordDocumentWrapper, IFileManager fileManager)
     : IWordGeneratorService
 {
-    public event EventHandler<GenerateWordProgressEventArgs>? GenerateWordProgress;
+    public event EventHandler<DownloadImagesProgressEventArgs>? DownloadImagesProgress;
+    public event EventHandler<GenerateDocumentProgressEventArgs>? GenerateWordProgress;
 
     private readonly ILogger<WordGeneratorService> _logger = logger;
     private readonly IScryfallClient _scryfallClient = scryfallClient;
@@ -45,59 +48,79 @@ public class WordGeneratorService(ILogger<WordGeneratorService> logger, IScryfal
 
     public async Task GenerateWord(DeckDetailsDTO deck, string? wordFileName = null, string? outputFolderDir = null, bool saveImages = false)
     {
-        try
+        // Prepare
+        int count = deck.Cards.SelectMany(c => c.CardSides).Count();
+        if (count == 0)
         {
-            int count = deck.Cards.SelectMany(c => c.CardSides).Count();
-            if (count == 0)
-            {
-                RaiseError("No cards found in the deck");
-                return;
-            }
-            var outputFolderPath = _fileManager.CreateOutputFolder(outputFolderDir);
-            if (outputFolderPath is null)
-            {
-                RaiseError("Error in creating output folder");
-                return;
-            }
-            var wordFilePath = _fileManager.ReturnCorrectWordFilePath(outputFolderPath, wordFileName ?? deck.Name);
-
-            using WordDocument document = _wordDocumentWrapper.Create(wordFilePath);
-            _wordDocumentWrapper.SetMargins(WordMargin.Narrow);
-            _wordDocumentWrapper.SetOrientation(PageOrientationValues.Landscape);
-            _wordDocumentWrapper.SetPageSize(WordPageSize.A4);
-            var paragraph = _wordDocumentWrapper.AddParagraph();
-
-            int step = UpdateStep(0, count);
-            foreach (var card in deck.Cards)
-            {
-                foreach (var cardSide in card.CardSides)
-                {
-                    var imageContent = await _scryfallClient.DownloadImage(cardSide.ImageUrl);
-                    if (imageContent == null)
-                    {
-                        step = UpdateStep(step, count);
-                        continue;
-                    }
-                    if (saveImages)
-                    {
-                        await _fileManager.CreateImageFile(imageContent, outputFolderPath, cardSide.Name);
-                    }
-
-                    AddImageToWord(paragraph, cardSide.Name, imageContent, card.Quantity);
-
-                    step = UpdateStep(step, count);
-                }
-            }
-
-            _wordDocumentWrapper.Save();
+            RaiseDownloadImageError("No cards found in the deck");
+            return;
+        }
+        var outputFolderPath = _fileManager.CreateOutputFolder(outputFolderDir);
+        if (outputFolderPath is null)
+        {
+            RaiseGenerateWordError("Error in creating output folder");
+            return;
+        }
+        
+        // Download images
+        try
+        {   
+            await DownloadImages(deck, wordFileName, saveImages, outputFolderPath, count);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in writting images to Word file");
-            RaiseError("Error in generating word");
+            _logger.LogError(ex, "Error in downloading images");
+            RaiseDownloadImageError("Error in downloading images");
+            return;
+        }
+
+        // Save word
+        try
+        {
+            StartGeneratingWord();
+            _wordDocumentWrapper.Save();
+            EndGeneratingWord();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in saving Word file");
+            RaiseDownloadImageError("Error in generating word");
+            return;
         }
     }
 
+    private async Task DownloadImages(DeckDetailsDTO deck, string? wordFileName, bool saveImages, string outputFolderPath,
+        int count)
+    {
+        var wordFilePath = _fileManager.ReturnCorrectWordFilePath(outputFolderPath, wordFileName ?? deck.Name);
+
+        using WordDocument document = _wordDocumentWrapper.Create(wordFilePath);
+        _wordDocumentWrapper.SetMargins(WordMargin.Narrow);
+        _wordDocumentWrapper.SetOrientation(PageOrientationValues.Landscape);
+        _wordDocumentWrapper.SetPageSize(WordPageSize.A4);
+        var paragraph = _wordDocumentWrapper.AddParagraph();
+
+        int step = UpdateDownloadImageStep(0, count);
+        foreach (var (card, side) in deck.Cards.SelectMany(
+                     card => card.CardSides.Select(side => (card, side))))
+        {
+            var imageContent = await _scryfallClient.DownloadImage(side.ImageUrl);
+            if (imageContent == null)
+            {
+                step = UpdateDownloadImageStep(step, count);
+                continue;
+            }
+
+            if (saveImages)
+            {
+                await _fileManager.CreateImageFile(imageContent, outputFolderPath, side.Name);
+            }
+
+            AddImageToWord(paragraph, side.Name, imageContent, card.Quantity);
+
+            step = UpdateDownloadImageStep(step, count);
+        }
+    }
 
     private void AddImageToWord(WordParagraph paragraph, string imageName, byte[] imageContent, int quantity)
     {
@@ -110,27 +133,24 @@ public class WordGeneratorService(ILogger<WordGeneratorService> logger, IScryfal
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in adding image to word file");
+            _logger.LogWarning(ex, "Error in adding image to word file - ImageName: {ImageName}",
+                imageName);
         }
     }
 
 
-    private void RaiseError(string? errorMessage = null)
+    private void RaiseDownloadImageError(string errorMessage) =>
+        DownloadImagesProgress?.Invoke(this,
+            new DownloadImagesProgressEventArgs(percent: 100, errorMessage: errorMessage));
+    private int UpdateDownloadImageStep(int step, int count)
     {
-        GenerateWordProgress?.Invoke(this, new GenerateWordProgressEventArgs
-        {
-            Percent = 100,
-            ErrorMessage = errorMessage
-        });
-    }
-
-    private int UpdateStep(int step, int count)
-    {
-        var percent = (double)step / count * 100;
-        GenerateWordProgress?.Invoke(this, new GenerateWordProgressEventArgs
-        {
-            Percent = percent
-        });
+        var progressPercent = (double)step / count * 100;
+        DownloadImagesProgress?.Invoke(this, new DownloadImagesProgressEventArgs(percent: progressPercent));
         return ++step;
     }
+
+    private void RaiseGenerateWordError(string errorMessage) =>
+        GenerateWordProgress?.Invoke(this, new(percent: 100, errorMessage: errorMessage));
+    private void StartGeneratingWord() => GenerateWordProgress?.Invoke(this, new (percent: 0));
+    private void EndGeneratingWord() => GenerateWordProgress?.Invoke(this, new (percent: 100));
 }
