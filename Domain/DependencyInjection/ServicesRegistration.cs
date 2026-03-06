@@ -28,6 +28,7 @@ public static class ServicesRegistration
             .AddScoped<IGoldfishService, GoldfishService>()
             .AddScoped<IMoxfieldService, MoxfieldService>()
             .AddScoped<IScryfallService, ScryfallService>()
+            .AddScoped<ICubeCobraService, CubeCobraService>()
             .AddScoped<ILanguageService, LanguageService>()
             .AddScoped<IWordGeneratorService, WordGeneratorService>()
         ;

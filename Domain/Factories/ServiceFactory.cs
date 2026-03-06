@@ -44,6 +44,7 @@ public class ServiceFactory(IServiceProvider serviceProvider) : IServiceFactory
             DeckBuilders.EDHREC_URL_DOMAIN => _serviceProvider.GetService<IEdhrecService>(),
             DeckBuilders.GOLDFISH_URL_DOMAIN => _serviceProvider.GetService<IGoldfishService>(),
             DeckBuilders.MOXFIELD_URL_DOMAIN => _serviceProvider.GetService<IMoxfieldService>(),
+            DeckBuilders.CUBECOBRA_URL_DOMAIN => _serviceProvider.GetService<ICubeCobraService>(),
             _ => null
         };
     }
