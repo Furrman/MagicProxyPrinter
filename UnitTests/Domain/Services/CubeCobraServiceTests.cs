@@ -1,20 +1,21 @@
 using Microsoft.Extensions.Logging;
-
 using Moq;
-
 using Domain.Clients;
-using Domain.Models.DTO.Moxfield;
 using Domain.Services;
 
 namespace UnitTests.Domain.Services;
 
-public class CubeCObraServiceTests
+public class CubeCobraServiceTests
 {
+    private readonly Mock<ICubeCobraClient> _cubeCobraClientMock;
+    private readonly Mock<ILogger<CubeCobraService>> _loggerMock;
     private readonly CubeCobraService _service;
 
-    public CubeCObraServiceTests()
+    public CubeCobraServiceTests()
     {
-        _service = new CubeCobraService();
+        _cubeCobraClientMock = new Mock<ICubeCobraClient>();
+        _loggerMock = new Mock<ILogger<CubeCobraService>>();
+        _service = new CubeCobraService(_cubeCobraClientMock.Object, _loggerMock.Object);
     }
 
     [Theory]

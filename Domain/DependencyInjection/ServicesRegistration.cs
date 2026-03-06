@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-
 using Domain.Factories;
 using Domain.IO;
 using Domain.Services;

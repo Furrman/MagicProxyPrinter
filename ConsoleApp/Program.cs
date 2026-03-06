@@ -28,12 +28,12 @@ internal class Program
             if (deckFilePath is null && deckUrl is null)
             {
                 ConsoleUtility.WriteErrorMessage("""
-                                                 You have to provide at least one from this list:
-                                                                 - path to exported deck
-                                                                 - url to your deck.
-                                                                 
-                                                                 Use --help to see more information.
-                                                 """);
+You have to provide at least one from this list:
+                - path to exported deck
+                - url to your deck.
+                
+                Use --help to see more information.
+""");
                 return -1;
             }
 

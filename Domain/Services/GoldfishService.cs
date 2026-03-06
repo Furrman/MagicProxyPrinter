@@ -1,8 +1,6 @@
 using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
-
 using HtmlAgilityPack;
-
 using Domain.Clients;
 using Domain.Factories;
 using Domain.Models.DTO;
