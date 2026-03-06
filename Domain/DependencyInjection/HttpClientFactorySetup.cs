@@ -46,6 +46,7 @@ public static class HttpClientFactorySetup
             client.BaseAddress = new Uri("https://api.scryfall.com/");
             client.Timeout = TimeSpan.FromSeconds(30);
             client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter");
+            client.DefaultRequestHeaders.Add("Accept", "text/json");
         })
         .AddPolicyHandler(GetRetryPolicy());
 
