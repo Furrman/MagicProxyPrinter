@@ -79,10 +79,12 @@ public class CubeCobraService(
                     : null,
                 Name = group.Key ?? string.Empty,
                 Quantity = group.Count(),
-                ExpansionCode = first.TryGetProperty("set", out var set)
+                ExpansionCode = first.TryGetProperty("details", out var details) &&
+                                details.TryGetProperty("set", out var set)
                     ? set.GetString()
                     : null,
-                CollectorNumber = first.TryGetProperty("collector_number", out var cn)
+                CollectorNumber = first.TryGetProperty("details", out var details2) &&
+                                  details2.TryGetProperty("collector_number", out var cn)
                     ? cn.GetString()
                     : null,
                 Foil = first.TryGetProperty("finish", out var finish)
