@@ -1,9 +1,6 @@
 using Microsoft.Extensions.Logging;
-
 using Moq;
-
 using Domain.Clients;
-using Domain.Models.DTO.Moxfield;
 using Domain.Services;
 
 namespace UnitTests.Domain.Services;

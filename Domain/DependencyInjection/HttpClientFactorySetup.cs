@@ -1,10 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
-
 using Polly;
 using Polly.Extensions.Http;
-
 using Domain.Clients;
-using System.Net.Http.Headers;
 
 namespace Domain.DependencyInjection;
 
@@ -12,6 +9,7 @@ public static class HttpClientFactorySetup
 {
     public static IServiceCollection ConfigureHttpClients(this IServiceCollection services)
     {
+        // TODO Use const value for User-Agent with app version
         services.AddHttpClient<IArchidektClient, ArchidektClient>(client =>
         {
             client.BaseAddress = new Uri("https://archidekt.com/api/");
@@ -36,11 +34,19 @@ public static class HttpClientFactorySetup
             client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter");
             client.DefaultRequestHeaders.Add("Accept", "text/html");
         }).AddPolicyHandler(GetRetryPolicy());
+        services.AddHttpClient<ICubeCobraClient, CubeCobraClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://www.cubecobra.com/");
+            client.Timeout = TimeSpan.FromSeconds(30);
+            client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter");
+            client.DefaultRequestHeaders.Add("Accept", "text/html");
+        }).AddPolicyHandler(GetRetryPolicy());
         services.AddHttpClient<IScryfallClient, ScryfallClient>(client =>
         {
             client.BaseAddress = new Uri("https://api.scryfall.com/");
             client.Timeout = TimeSpan.FromSeconds(30);
             client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter");
+            client.DefaultRequestHeaders.Add("Accept", "text/json");
         })
         .AddPolicyHandler(GetRetryPolicy());
 

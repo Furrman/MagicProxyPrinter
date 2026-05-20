@@ -6,4 +6,5 @@ internal class DeckBuilders
     public const string EDHREC_URL_DOMAIN = "edhrec.com";
     public const string GOLDFISH_URL_DOMAIN = "mtggoldfish.com";
     public const string MOXFIELD_URL_DOMAIN = "moxfield.com";
+    public const string CUBECOBRA_URL_DOMAIN = "cubecobra.com";
 }

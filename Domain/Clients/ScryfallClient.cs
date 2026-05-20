@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Http.Json;
-
 using Domain.Models.DTO.Scryfall;
 
 namespace Domain.Clients;
