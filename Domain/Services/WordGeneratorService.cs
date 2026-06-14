@@ -61,11 +61,13 @@ public class WordGeneratorService(ILogger<WordGeneratorService> logger, IScryfal
             RaiseGenerateWordError("Error in creating output folder");
             return;
         }
+        var wordFilePath = _fileManager.ReturnCorrectWordFilePath(outputFolderPath, wordFileName ?? deck.Name);
+        using WordDocument document = _wordDocumentWrapper.Create(wordFilePath);
         
         // Download images
         try
         {   
-            await DownloadImages(deck, wordFileName, saveImages, outputFolderPath, count);
+            await DownloadImages(deck, saveImages, outputFolderPath, count);
         }
         catch (Exception ex)
         {
@@ -89,12 +91,9 @@ public class WordGeneratorService(ILogger<WordGeneratorService> logger, IScryfal
         }
     }
 
-    private async Task DownloadImages(DeckDetailsDTO deck, string? wordFileName, bool saveImages, string outputFolderPath,
+    private async Task DownloadImages(DeckDetailsDTO deck, bool saveImages, string outputFolderPath,
         int count)
     {
-        var wordFilePath = _fileManager.ReturnCorrectWordFilePath(outputFolderPath, wordFileName ?? deck.Name);
-
-        using WordDocument document = _wordDocumentWrapper.Create(wordFilePath);
         _wordDocumentWrapper.SetMargins(WordMargin.Narrow);
         _wordDocumentWrapper.SetOrientation(PageOrientationValues.Landscape);
         _wordDocumentWrapper.SetPageSize(WordPageSize.A4);
