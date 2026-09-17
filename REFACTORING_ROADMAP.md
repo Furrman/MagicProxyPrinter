@@ -85,7 +85,7 @@ Effort: medium. Removes roughly 150 lines of duplicated boilerplate.
 
 ---
 
-## Phase 4 — De-duplicate the site services
+## Phase 4 — De-duplicate the site services ✅ Done (base covers CubeCobraService too; secondary regex finding still open)
 
 `ArchidektService`, `CubeCobraService`, `EdhrecService`, `GoldfishService`, `MoxfieldService` (`Domain/Services/*.cs`) all follow the same shape:
 
