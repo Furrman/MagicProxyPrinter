@@ -18,33 +18,16 @@ public interface IGoldfishService : IDeckBuildService
     bool TryExtractRelativePath(string url, out string deckId);
 }
 
-public class GoldfishService(IGoldfishClient goldfishClient,
-    ILogger<GoldfishService> logger) : IGoldfishService
+public class GoldfishService(IGoldfishClient goldfishClient, ILogger<GoldfishService> logger)
+    : HtmlScrapingDeckServiceBase<GoldfishService, IGoldfishClient, string>(goldfishClient, logger), IGoldfishService
 {
-    private readonly IGoldfishClient _goldfishClient = goldfishClient;
-    private readonly ILogger<GoldfishService> _logger = logger;
-
-    public async Task<DeckDetailsDTO?> RetrieveDeckFromWeb(string deckUrl)
-    {
-        var htmlContent = await GetDeckHtmlContent(deckUrl);
-        if (htmlContent is null)
-        {
-            _logger.LogError("Deck not loaded from internet");
-            return null;
-        }
-
-        var deck = ScrapDeckFromHtml(htmlContent);
-
-        return deck;
-    }
-    
-    private DeckDetailsDTO ScrapDeckFromHtml(string htmlContent)
+    public override DeckDetailsDTO ScrapDeckFromHtml(string htmlContent)
     {
         HtmlDocument htmlDoc = new();
         htmlDoc.LoadHtml(htmlContent);
-        
+
         DeckDetailsDTO deck = new();
-        
+
         // Extract the deck name
         var deckNameNode = htmlDoc.DocumentNode.SelectSingleNode("//h1[@class='title']");
         deck.Name = deckNameNode != null ? deckNameNode.InnerText.Trim() : string.Empty;
@@ -79,11 +62,11 @@ public class GoldfishService(IGoldfishClient goldfishClient,
                 Quantity = quantity,
             });
         }
-        
+
         return deck;
     }
 
-    public bool TryExtractRelativePath(string url, out string relativePath)
+    public override bool TryExtractRelativePath(string url, out string relativePath)
     {
         relativePath = string.Empty;
 
@@ -98,20 +81,5 @@ public class GoldfishService(IGoldfishClient goldfishClient,
         }
 
         return false;
-    }
-
-
-    private async Task<string?> GetDeckHtmlContent(string deckUrl)
-    {
-        TryExtractRelativePath(deckUrl, out string relativePath);
-        
-        var htmlContent = await _goldfishClient.GetCardsInHtml(relativePath);
-        if (htmlContent is null)
-        {
-            _logger.LogError("Deck not loaded from internet");
-            return null;
-        }
-
-        return htmlContent;
     }
 }

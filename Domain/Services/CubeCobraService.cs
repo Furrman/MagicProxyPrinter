@@ -1,10 +1,12 @@
+using System.Text.Json;
+using System.Text.RegularExpressions;
+
+using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
+
 using Domain.Clients;
 using Domain.Factories;
 using Domain.Models.DTO;
-using HtmlAgilityPack;
-using Microsoft.Extensions.Logging;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 
 namespace Domain.Services;
 
@@ -19,16 +21,26 @@ public interface ICubeCobraService : IDeckBuildService
     bool TryExtractRelativePath(string url, out Guid deckId);
 }
 
-public class CubeCobraService(
-    ICubeCobraClient cubeCobraClient,
-    ILogger<CubeCobraService> logger) : ICubeCobraService
+public class CubeCobraService(ICubeCobraClient cubeCobraClient, ILogger<CubeCobraService> logger)
+    : HtmlScrapingDeckServiceBase<CubeCobraService, ICubeCobraClient, Guid>(cubeCobraClient, logger), ICubeCobraService
 {
-    private readonly ICubeCobraClient _cubeCobraClient = cubeCobraClient;
-    private readonly ILogger<CubeCobraService> _logger = logger;
-
-    public async Task<DeckDetailsDTO?> RetrieveDeckFromWeb(string deckUrl)
+    public override bool TryExtractRelativePath(string url, out Guid deckId)
     {
-        var htmlContent = await GetDeckHtmlContent(deckUrl);
+        deckId = Guid.Empty;
+
+        const string pattern =
+            @"^(https://)?(www\.)?cubecobra\.com/cube/list/(?<deckId>[0-9a-fA-F-]{36})/?$";
+        var regex = new Regex(pattern);
+
+        Match match = regex.Match(url);
+        if (!match.Success) return false;
+
+        var stringifyDeckId = match.Groups["deckId"].Value;
+        return Guid.TryParse(stringifyDeckId, out deckId);
+    }
+
+    public override DeckDetailsDTO? ScrapDeckFromHtml(string htmlContent)
+    {
         if (string.IsNullOrWhiteSpace(htmlContent)) return null;
 
         var htmlDoc = new HtmlDocument();
@@ -66,7 +78,7 @@ public class CubeCobraService(
             ? maybe.EnumerateArray()
             : Enumerable.Empty<JsonElement>();
         var allCards = mainboard.Concat(maybeboard);
-        
+
         var groupedCards = allCards
             .GroupBy(card => card.GetProperty("name").GetString());
         foreach (var group in groupedCards)
@@ -91,46 +103,11 @@ public class CubeCobraService(
                        && finish.GetString()?.Contains("foil", StringComparison.OrdinalIgnoreCase) == true,
                 Etched = first.TryGetProperty("finish", out var etched)
                          && etched.GetString()?.Contains("etched", StringComparison.OrdinalIgnoreCase) == true
-            }; 
-            
+            };
+
             deck.Cards.Add(card);
         }
 
         return deck;
-    }
-
-    public bool TryExtractRelativePath(string url, out Guid deckId)
-    {
-        deckId = Guid.Empty;
-
-        const string pattern =
-            @"^(https://)?(www\.)?cubecobra\.com/cube/list/(?<deckId>[0-9a-fA-F-]{36})/?$";
-        var regex = new Regex(pattern);
-
-        Match match = regex.Match(url);
-        if (!match.Success) return false;
-
-        var stringifyDeckId = match.Groups["deckId"].Value;
-        var parseResult = Guid.TryParse(stringifyDeckId, out deckId);
-        return parseResult;
-    }
-    
-    
-    private async Task<string?> GetDeckHtmlContent(string deckUrl)
-    {
-        if (!TryExtractRelativePath(deckUrl, out Guid deckId))
-        {
-            _logger.LogError("Error parsing deckId from url");
-            return null;
-        }
-        
-        var htmlContent = await _cubeCobraClient.GetCardsInHtml(deckId.ToString());
-        if (htmlContent is null)
-        {
-            _logger.LogError("Deck not loaded from internet");
-            return null;
-        }
-
-        return htmlContent;
     }
 }

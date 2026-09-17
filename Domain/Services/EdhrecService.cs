@@ -25,8 +25,8 @@ public interface IEdhrecService : IDeckBuildService
     /// </summary>
     /// <param name="htmlContent">HTML code retrieved from website from deck.</param>
     /// <returns>Deck object with deck details and cards.</returns>
-    DeckDetailsDTO ScrapDeckFromHtml(string htmlContent);
-    
+    DeckDetailsDTO? ScrapDeckFromHtml(string htmlContent);
+
     /// <summary>
     /// Tries to extract matching relative path from the given URL.
     /// </summary>
@@ -36,38 +36,20 @@ public interface IEdhrecService : IDeckBuildService
     bool TryExtractRelativePath(string url, out string deckId);
 }
 
-public class EdhrecService(IEdhrecClient edhrecClient,
-    ILogger<EdhrecService> logger) : IEdhrecService
+public class EdhrecService(IEdhrecClient edhrecClient, ILogger<EdhrecService> logger)
+    : HtmlScrapingDeckServiceBase<EdhrecService, IEdhrecClient, string>(edhrecClient, logger), IEdhrecService
 {
-    private readonly IEdhrecClient _edhrecClient = edhrecClient;
-    private readonly ILogger<EdhrecService> _logger = logger;
-
-    public async Task<DeckDetailsDTO?> RetrieveDeckFromWeb(string deckUrl)
-    {
-        var htmlContent = await GetDeckHtmlContent(deckUrl);
-        if (htmlContent is null)
-        {
-            _logger.LogError("Deck not loaded from internet");
-            return null;
-        }
-
-        var deck = ScrapDeckFromHtml(htmlContent);
-
-        return deck;
-    }
-
     public async Task<(string?, string?)> GetOriginalDeckLink(string deckUrl)
     {
         var htmlContent = await GetDeckHtmlContent(deckUrl);
         if (htmlContent is null)
         {
-            _logger.LogError("Deck not loaded from internet");
             return (null, null);
         }
-        
+
         var htmlDoc = new HtmlDocument();
         htmlDoc.LoadHtml(htmlContent);
-        
+
         var sourceLinkNode = htmlDoc.DocumentNode.SelectSingleNode("//div[contains(text(), 'Source:')]/a");
         if (sourceLinkNode != null)
         {
@@ -78,12 +60,12 @@ public class EdhrecService(IEdhrecClient edhrecClient,
 
         return (null, htmlContent);
     }
-    
-    public DeckDetailsDTO ScrapDeckFromHtml(string htmlContent)
+
+    public override DeckDetailsDTO? ScrapDeckFromHtml(string htmlContent)
     {
         var htmlDoc = new HtmlDocument();
         htmlDoc.LoadHtml(htmlContent);
-        
+
         // Get the deck name
         var deck = new DeckDetailsDTO();
         var deckNameNode = htmlDoc.DocumentNode.SelectSingleNode("//h3[contains(text(), 'Deck with')]");
@@ -99,7 +81,7 @@ public class EdhrecService(IEdhrecClient edhrecClient,
                 deck.Name = HttpUtility.HtmlDecode(deckNameNode.InnerText.Trim());
             }
         }
-        
+
         // Get card entries
         var nodes = htmlDoc.DocumentNode.SelectNodes("//span[contains(@class, 'Card_name__')]");
         if (nodes != null)
@@ -114,7 +96,7 @@ public class EdhrecService(IEdhrecClient edhrecClient,
         return deck;
     }
 
-    public bool TryExtractRelativePath(string url, out string relativePath)
+    public override bool TryExtractRelativePath(string url, out string relativePath)
     {
         relativePath = string.Empty;
 
@@ -129,20 +111,5 @@ public class EdhrecService(IEdhrecClient edhrecClient,
         }
 
         return false;
-    }
-
-
-    private async Task<string?> GetDeckHtmlContent(string deckUrl)
-    {
-        TryExtractRelativePath(deckUrl, out string relativePath);
-        
-        var htmlContent = await _edhrecClient.GetCardsInHtml(relativePath);
-        if (htmlContent is null)
-        {
-            _logger.LogError("Deck not loaded from internet");
-            return null;
-        }
-
-        return htmlContent;
     }
 }

@@ -59,6 +59,20 @@ public class EdhrecServiceTests
     }
 
     [Fact]
+    public async Task RetrieveDeckFromWeb_WithInvalidUrl_ReturnsNullWithoutCallingClient()
+    {
+        // Arrange
+        string deckUrl = "https://edhrec.com/not-a-deck-path";
+
+        // Act
+        var result = await _service.RetrieveDeckFromWeb(deckUrl);
+
+        // Assert
+        Assert.Null(result);
+        _edhrecClientMock.Verify(x => x.GetCardsInHtml(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
     public async Task RetrieveDeckFromWeb_WithValidDeckId_ReturnsDeckDetails()
     {
         // Arrange
