@@ -43,7 +43,7 @@ These aren't tech debt, they're actual bugs found while scanning. Fixing them is
 
 ---
 
-## Phase 2 — Test coverage gaps (do before de-duplicating in Phase 3/4)
+## Phase 2 — Test coverage gaps (do before de-duplicating in Phase 3/4) ✅ Done
 
 Comparing `Domain/` against `UnitTests/Domain/` shows entire layers with zero coverage:
 

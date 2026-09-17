@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Reflection;
+
+using Microsoft.Extensions.DependencyInjection;
 
 using Domain.DependencyInjection;
 
@@ -10,10 +12,18 @@ internal static class DependencyInjectionConfigurator
     {
         var serviceProvider = new ServiceCollection()
             .RegisterDomainClasses()
-            .ConfigureHttpClients()
+            .ConfigureHttpClients(GetAppVersion())
             .SetupNLog()
             .BuildServiceProvider();
 
         return serviceProvider;
+    }
+
+    internal static string GetAppVersion()
+    {
+        var version = Assembly.GetExecutingAssembly().GetName().Version
+            ?? throw new InvalidOperationException("Could not determine the application version from the executing assembly.");
+
+        return version.ToString(3);
     }
 }

@@ -2,16 +2,15 @@ using System.Net;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Domain.Clients;
+using Domain.Constants;
 
 namespace UnitTests.Domain.Clients;
 
 public class ScryfallClientTests
 {
-    private const string BaseAddress = "https://api.scryfall.com/";
-
     private static ScryfallClient CreateClient(FakeHttpMessageHandler handler)
     {
-        var httpClient = new HttpClient(handler) { BaseAddress = new Uri(BaseAddress) };
+        var httpClient = new HttpClient(handler) { BaseAddress = new Uri(HttpClientSettings.SCRYFALL_BASE_URL) };
         return new ScryfallClient(httpClient, Mock.Of<ILogger<ScryfallClient>>());
     }
 
@@ -23,7 +22,7 @@ public class ScryfallClientTests
 
         await client.FindCard("Lightning Bolt", "LEA", "161", "en");
 
-        Assert.Equal("https://api.scryfall.com/cards/LEA/161/en", handler.LastRequest!.RequestUri!.AbsoluteUri);
+        Assert.Equal($"{HttpClientSettings.SCRYFALL_BASE_URL}cards/LEA/161/en", handler.LastRequest!.RequestUri!.AbsoluteUri);
     }
 
     [Fact]
@@ -34,7 +33,7 @@ public class ScryfallClientTests
 
         await client.FindCard("Lightning Bolt", "LEA", "161");
 
-        Assert.Equal("https://api.scryfall.com/cards/LEA/161", handler.LastRequest!.RequestUri!.AbsoluteUri);
+        Assert.Equal($"{HttpClientSettings.SCRYFALL_BASE_URL}cards/LEA/161", handler.LastRequest!.RequestUri!.AbsoluteUri);
     }
 
     [Fact]
@@ -45,7 +44,7 @@ public class ScryfallClientTests
 
         await client.SearchCard("Lightning Bolt", includeExtras: false, includeMultilingual: false);
 
-        Assert.Equal("https://api.scryfall.com/cards/search?q=Lightning%20Bolt", handler.LastRequest!.RequestUri!.AbsoluteUri);
+        Assert.Equal($"{HttpClientSettings.SCRYFALL_BASE_URL}cards/search?q=Lightning%20Bolt", handler.LastRequest!.RequestUri!.AbsoluteUri);
     }
 
     [Fact]
@@ -56,7 +55,7 @@ public class ScryfallClientTests
 
         await client.SearchCard("Fire // Ice", includeExtras: false, includeMultilingual: false);
 
-        Assert.Equal("https://api.scryfall.com/cards/search?q=Fire%20%2F%2F%20Ice", handler.LastRequest!.RequestUri!.AbsoluteUri);
+        Assert.Equal($"{HttpClientSettings.SCRYFALL_BASE_URL}cards/search?q=Fire%20%2F%2F%20Ice", handler.LastRequest!.RequestUri!.AbsoluteUri);
     }
 
     [Fact]
