@@ -10,4 +10,8 @@ internal class HttpClientSettings
     public const string SCRYFALL_BASE_URL = "https://api.scryfall.com/";
 
     public const int DEFAULT_TIMEOUT_SECONDS = 30;
+
+    public const string APP_NAME = "MagicProxyPrinter";
+    public const string ACCEPT_HTML = "text/html";
+    public const string ACCEPT_JSON = "text/json";
 }
