@@ -3,17 +3,16 @@ using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Domain.Clients;
+using Domain.Constants;
 using Domain.Models.DTO.Archidekt;
 
 namespace UnitTests.Domain.Clients;
 
 public class ArchidektClientTests
 {
-    private const string BaseAddress = "https://archidekt.com/api/";
-
     private static ArchidektClient CreateClient(FakeHttpMessageHandler handler)
     {
-        var httpClient = new HttpClient(handler) { BaseAddress = new Uri(BaseAddress) };
+        var httpClient = new HttpClient(handler) { BaseAddress = new Uri(HttpClientSettings.ARCHIDEKT_BASE_URL) };
         return new ArchidektClient(httpClient, Mock.Of<ILogger<ArchidektClient>>());
     }
 
@@ -25,7 +24,7 @@ public class ArchidektClientTests
 
         await client.GetDeck(123456);
 
-        Assert.Equal("https://archidekt.com/api/decks/123456/", handler.LastRequest!.RequestUri!.AbsoluteUri);
+        Assert.Equal($"{HttpClientSettings.ARCHIDEKT_BASE_URL}decks/123456/", handler.LastRequest!.RequestUri!.AbsoluteUri);
     }
 
     [Fact]

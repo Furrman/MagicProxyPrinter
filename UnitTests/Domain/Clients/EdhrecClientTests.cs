@@ -2,16 +2,15 @@ using System.Net;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Domain.Clients;
+using Domain.Constants;
 
 namespace UnitTests.Domain.Clients;
 
 public class EdhrecClientTests
 {
-    private const string BaseAddress = "https://edhrec.com/";
-
     private static EdhrecClient CreateClient(FakeHttpMessageHandler handler)
     {
-        var httpClient = new HttpClient(handler) { BaseAddress = new Uri(BaseAddress) };
+        var httpClient = new HttpClient(handler) { BaseAddress = new Uri(HttpClientSettings.EDHREC_BASE_URL) };
         return new EdhrecClient(httpClient, Mock.Of<ILogger<EdhrecClient>>());
     }
 
@@ -23,7 +22,7 @@ public class EdhrecClientTests
 
         await client.GetCardsInHtml("commanders/atraxa");
 
-        Assert.Equal("https://edhrec.com/commanders/atraxa", handler.LastRequest!.RequestUri!.AbsoluteUri);
+        Assert.Equal($"{HttpClientSettings.EDHREC_BASE_URL}commanders/atraxa", handler.LastRequest!.RequestUri!.AbsoluteUri);
     }
 
     [Fact]

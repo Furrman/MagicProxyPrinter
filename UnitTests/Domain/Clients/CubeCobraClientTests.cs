@@ -2,16 +2,15 @@ using System.Net;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Domain.Clients;
+using Domain.Constants;
 
 namespace UnitTests.Domain.Clients;
 
 public class CubeCobraClientTests
 {
-    private const string BaseAddress = "https://www.cubecobra.com/";
-
     private static CubeCobraClient CreateClient(FakeHttpMessageHandler handler)
     {
-        var httpClient = new HttpClient(handler) { BaseAddress = new Uri(BaseAddress) };
+        var httpClient = new HttpClient(handler) { BaseAddress = new Uri(HttpClientSettings.CUBECOBRA_BASE_URL) };
         return new CubeCobraClient(httpClient, Mock.Of<ILogger<CubeCobraClient>>());
     }
 
@@ -23,7 +22,7 @@ public class CubeCobraClientTests
 
         await client.GetCardsInHtml("my-cube");
 
-        Assert.Equal("https://www.cubecobra.com/cube/list/my-cube", handler.LastRequest!.RequestUri!.AbsoluteUri);
+        Assert.Equal($"{HttpClientSettings.CUBECOBRA_BASE_URL}cube/list/my-cube", handler.LastRequest!.RequestUri!.AbsoluteUri);
     }
 
     [Fact]

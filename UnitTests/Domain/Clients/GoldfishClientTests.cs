@@ -2,16 +2,15 @@ using System.Net;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Domain.Clients;
+using Domain.Constants;
 
 namespace UnitTests.Domain.Clients;
 
 public class GoldfishClientTests
 {
-    private const string BaseAddress = "https://www.mtggoldfish.com/";
-
     private static GoldfishClient CreateClient(FakeHttpMessageHandler handler)
     {
-        var httpClient = new HttpClient(handler) { BaseAddress = new Uri(BaseAddress) };
+        var httpClient = new HttpClient(handler) { BaseAddress = new Uri(HttpClientSettings.GOLDFISH_BASE_URL) };
         return new GoldfishClient(httpClient, Mock.Of<ILogger<GoldfishClient>>());
     }
 
@@ -23,7 +22,7 @@ public class GoldfishClientTests
 
         await client.GetCardsInHtml("deck/1234");
 
-        Assert.Equal("https://www.mtggoldfish.com/deck/1234", handler.LastRequest!.RequestUri!.AbsoluteUri);
+        Assert.Equal($"{HttpClientSettings.GOLDFISH_BASE_URL}deck/1234", handler.LastRequest!.RequestUri!.AbsoluteUri);
     }
 
     [Fact]

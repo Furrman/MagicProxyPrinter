@@ -2,49 +2,52 @@ using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Extensions.Http;
 using Domain.Clients;
+using Domain.Constants;
 
 namespace Domain.DependencyInjection;
 
 public static class HttpClientFactorySetup
 {
+    private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(HttpClientSettings.DEFAULT_TIMEOUT_SECONDS);
+
     public static IServiceCollection ConfigureHttpClients(this IServiceCollection services)
     {
         // TODO Use const value for User-Agent with app version
         services.AddHttpClient<IArchidektClient, ArchidektClient>(client =>
         {
-            client.BaseAddress = new Uri("https://archidekt.com/api/");
-            client.Timeout = TimeSpan.FromSeconds(30);
+            client.BaseAddress = new Uri(HttpClientSettings.ARCHIDEKT_BASE_URL);
+            client.Timeout = DefaultTimeout;
         }).AddPolicyHandler(GetRetryPolicy());
         services.AddHttpClient<IMoxfieldClient, MoxfieldClient>(client =>
         {
-            client.BaseAddress = new Uri("https://api2.moxfield.com/v3/");
-            client.Timeout = TimeSpan.FromSeconds(30);
+            client.BaseAddress = new Uri(HttpClientSettings.MOXFIELD_BASE_URL);
+            client.Timeout = DefaultTimeout;
             client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter");
         }).AddPolicyHandler(GetRetryPolicy());
         services.AddHttpClient<IEdhrecClient, EdhrecClient>(client =>
         {
-            client.BaseAddress = new Uri("https://edhrec.com/");
-            client.Timeout = TimeSpan.FromSeconds(30);
+            client.BaseAddress = new Uri(HttpClientSettings.EDHREC_BASE_URL);
+            client.Timeout = DefaultTimeout;
             client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter");
         }).AddPolicyHandler(GetRetryPolicy());
         services.AddHttpClient<IGoldfishClient, GoldfishClient>(client =>
         {
-            client.BaseAddress = new Uri("https://www.mtggoldfish.com/");
-            client.Timeout = TimeSpan.FromSeconds(30);
+            client.BaseAddress = new Uri(HttpClientSettings.GOLDFISH_BASE_URL);
+            client.Timeout = DefaultTimeout;
             client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter");
             client.DefaultRequestHeaders.Add("Accept", "text/html");
         }).AddPolicyHandler(GetRetryPolicy());
         services.AddHttpClient<ICubeCobraClient, CubeCobraClient>(client =>
         {
-            client.BaseAddress = new Uri("https://www.cubecobra.com/");
-            client.Timeout = TimeSpan.FromSeconds(30);
+            client.BaseAddress = new Uri(HttpClientSettings.CUBECOBRA_BASE_URL);
+            client.Timeout = DefaultTimeout;
             client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter");
             client.DefaultRequestHeaders.Add("Accept", "text/html");
         }).AddPolicyHandler(GetRetryPolicy());
         services.AddHttpClient<IScryfallClient, ScryfallClient>(client =>
         {
-            client.BaseAddress = new Uri("https://api.scryfall.com/");
-            client.Timeout = TimeSpan.FromSeconds(30);
+            client.BaseAddress = new Uri(HttpClientSettings.SCRYFALL_BASE_URL);
+            client.Timeout = DefaultTimeout;
             client.DefaultRequestHeaders.Add("User-Agent", "MagicProxyPrinter");
             client.DefaultRequestHeaders.Add("Accept", "text/json");
         })

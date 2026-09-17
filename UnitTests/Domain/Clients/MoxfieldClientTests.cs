@@ -3,17 +3,16 @@ using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Domain.Clients;
+using Domain.Constants;
 using Domain.Models.DTO.Moxfield;
 
 namespace UnitTests.Domain.Clients;
 
 public class MoxfieldClientTests
 {
-    private const string BaseAddress = "https://api2.moxfield.com/v3/";
-
     private static MoxfieldClient CreateClient(FakeHttpMessageHandler handler)
     {
-        var httpClient = new HttpClient(handler) { BaseAddress = new Uri(BaseAddress) };
+        var httpClient = new HttpClient(handler) { BaseAddress = new Uri(HttpClientSettings.MOXFIELD_BASE_URL) };
         return new MoxfieldClient(httpClient, Mock.Of<ILogger<MoxfieldClient>>());
     }
 
@@ -25,7 +24,7 @@ public class MoxfieldClientTests
 
         await client.GetDeck("abc123");
 
-        Assert.Equal("https://api2.moxfield.com/v3/decks/all/abc123", handler.LastRequest!.RequestUri!.AbsoluteUri);
+        Assert.Equal($"{HttpClientSettings.MOXFIELD_BASE_URL}decks/all/abc123", handler.LastRequest!.RequestUri!.AbsoluteUri);
     }
 
     [Fact]
