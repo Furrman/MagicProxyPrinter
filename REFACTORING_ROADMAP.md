@@ -108,7 +108,7 @@ Effort: medium-large. This is the highest-value structural cleanup in the codeba
 
 ---
 
-## Phase 5 — Resource management cleanup
+## Phase 5 — Resource management cleanup ✅ Done
 
 1. **Double disposal path for the Word document.**
    `Domain/Services/WordGeneratorService.cs:65` does `using WordDocument document = _wordDocumentWrapper.Create(wordFilePath);` while `WordDocumentWrapper` (`Domain/IO/WordDocumentWrapper.cs:56-104`) *also* implements `IDisposable` and disposes the same underlying `_wordDocument` in its own `Dispose()`. Two independent owners for one resource — works today because OfficeIMO's dispose is presumably idempotent, but it's fragile. Pick one clear owner (recommend: the wrapper owns disposal; drop the `using` on the raw `WordDocument`, or don't implement `IDisposable` on the wrapper and let the `using` at the call site be the only disposal path). Effort: small.

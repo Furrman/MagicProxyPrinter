@@ -62,8 +62,8 @@ public class WordGeneratorService(ILogger<WordGeneratorService> logger, IScryfal
             return;
         }
         var wordFilePath = _fileManager.ReturnCorrectWordFilePath(outputFolderPath, wordFileName ?? deck.Name);
-        using WordDocument document = _wordDocumentWrapper.Create(wordFilePath);
-        
+        _wordDocumentWrapper.Create(wordFilePath);
+
         // Download images
         try
         {   

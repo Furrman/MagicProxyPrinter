@@ -56,6 +56,7 @@ public interface IWordDocumentWrapper
 public class WordDocumentWrapper : IWordDocumentWrapper, IDisposable
 {
     private WordDocument? _wordDocument;
+    private bool _disposed;
 
     public WordDocument Create(string filePath)
     {
@@ -89,7 +90,7 @@ public class WordDocumentWrapper : IWordDocumentWrapper, IDisposable
 
     public void AddImage(WordParagraph paragraph, byte[] imageContent, string fileName, double? width, double? height)
     {
-        var stream = new MemoryStream(imageContent);
+        using var stream = new MemoryStream(imageContent);
         paragraph.AddImage(stream, fileName, width, height);
     }
 
@@ -100,6 +101,12 @@ public class WordDocumentWrapper : IWordDocumentWrapper, IDisposable
 
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
         _wordDocument?.Dispose();
+        _disposed = true;
     }
 }
