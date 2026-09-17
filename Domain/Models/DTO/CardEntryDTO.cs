@@ -25,7 +25,14 @@ public class CardEntryDTO : IEquatable<CardEntryDTO>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Name, Quantity, CardSides);
+        var cardSidesHash = 0;
+        foreach (var side in CardSides)
+        {
+            // XOR keeps the combined hash independent of the HashSet's iteration order.
+            cardSidesHash ^= side.GetHashCode();
+        }
+
+        return HashCode.Combine(Name, Quantity, cardSidesHash);
     }
 
     public override bool Equals(object? obj)
@@ -41,8 +48,8 @@ public class CardEntryDTO : IEquatable<CardEntryDTO>
         if (other is null)
             return false;
 
-        return Name == other.Name 
-            && Quantity == other.Quantity 
-            && CardSides == CardSides;
+        return Name == other.Name
+            && Quantity == other.Quantity
+            && CardSides.SetEquals(other.CardSides);
     }
 }

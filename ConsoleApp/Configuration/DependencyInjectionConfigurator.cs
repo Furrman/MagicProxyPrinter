@@ -6,7 +6,7 @@ namespace ConsoleApp.Configuration;
 
 internal static class DependencyInjectionConfigurator
 {
-    public static IServiceProvider Setup()
+    public static ServiceProvider Setup()
     {
         var serviceProvider = new ServiceCollection()
             .RegisterDomainClasses()
