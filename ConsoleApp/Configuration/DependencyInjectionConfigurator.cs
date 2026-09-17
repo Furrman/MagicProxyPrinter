@@ -19,8 +19,11 @@ internal static class DependencyInjectionConfigurator
         return serviceProvider;
     }
 
-    private static string? GetAppVersion()
+    internal static string GetAppVersion()
     {
-        return Assembly.GetExecutingAssembly().GetName().Version?.ToString(3);
+        var version = Assembly.GetExecutingAssembly().GetName().Version
+            ?? throw new InvalidOperationException("Could not determine the application version from the executing assembly.");
+
+        return version.ToString(3);
     }
 }
