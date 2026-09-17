@@ -88,4 +88,38 @@ public class WordDocumentWrapperTests : IDisposable
 
         Assert.Null(exception);
     }
+
+    [Fact]
+    public void Dispose_CalledTwice_DoesNotThrow()
+    {
+        var wrapper = new WordDocumentWrapper();
+        wrapper.Create(_filePath);
+        wrapper.Dispose();
+
+        var exception = Record.Exception(wrapper.Dispose);
+
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public void AddImage_SavesImage_EvenThoughSourceStreamIsDisposedImmediately()
+    {
+        // 1x1 transparent PNG - the smallest content OfficeIMO will accept as a real image.
+        var imageBytes = Convert.FromBase64String(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=");
+
+        using (var wrapper = new WordDocumentWrapper())
+        {
+            wrapper.Create(_filePath);
+            var paragraph = wrapper.AddParagraph();
+
+            // AddImage disposes its internal MemoryStream before returning - confirm OfficeIMO has
+            // already consumed the bytes by then, not deferred them until Save().
+            wrapper.AddImage(paragraph, imageBytes, "test-image", width: 10, height: 10);
+            wrapper.Save();
+        }
+
+        using var reloaded = WordDocument.Load(_filePath);
+        Assert.NotEmpty(reloaded.Images);
+    }
 }
