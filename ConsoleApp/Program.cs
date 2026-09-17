@@ -26,7 +26,13 @@ internal class Program
             [CoconoaOptions(Description = "Include emblems attached to a cards into output document")] bool includeEmblems = false,
             [CoconoaOptions(Description = "Flag to store original images in the same folder as output file")] bool storeOriginalImages = false) =>
         {
-            var languageService = serviceProvider.GetService<ILanguageService>()!;
+            // Domain services are registered Scoped; an explicit scope per run makes that lifetime
+            // meaningful and ensures scoped disposables (e.g. IWordDocumentWrapper) are disposed
+            // as soon as this run finishes, rather than only when the root provider disposes.
+            using var scope = serviceProvider.CreateScope();
+            var scopedProvider = scope.ServiceProvider;
+
+            var languageService = scopedProvider.GetService<ILanguageService>()!;
             var validationErrors = InputValidator.Validate(deckFilePath, deckUrl, languageCode, tokenCopies, languageService);
             if (validationErrors.Count > 0)
             {
@@ -37,12 +43,12 @@ internal class Program
                 return -1;
             }
 
-            var magicProxyPrinter = serviceProvider.GetService<IMagicProxyPrinter>()!;
+            var magicProxyPrinter = scopedProvider.GetService<IMagicProxyPrinter>()!;
             magicProxyPrinter.ProgressUpdate += UpdateProgressOnConsole;
-            magicProxyPrinter.GenerateWord(deckUrl, 
-                deckFilePath, 
-                outputPath, 
-                outputFileName, 
+            magicProxyPrinter.GenerateWord(deckUrl,
+                deckFilePath,
+                outputPath,
+                outputFileName,
                 languageCode,
                 tokenCopies ?? 0,
                 groupTokens,

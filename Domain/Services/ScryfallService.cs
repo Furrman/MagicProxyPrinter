@@ -163,9 +163,9 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
     }
     
 
-    private bool IsArtCard(CardEntryDTO deckCard) => deckCard.Art;
+    private static bool IsArtCard(CardEntryDTO deckCard) => deckCard.Art;
 
-    private bool IsDualSideCard(CardDataDTO scryfallCardData) => scryfallCardData.CardFaces is not null
+    private static bool IsDualSideCard(CardDataDTO scryfallCardData) => scryfallCardData.CardFaces is not null
         && scryfallCardData.ImageUriData is null; // If card has image and has card faces, it is Adventure card with one side
 
     private HashSet<CardSideDTO> GetDualSideCardLinks(CardEntryDTO deckCard, CardDataDTO scryfallCardData)
@@ -189,7 +189,7 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
         return cardSides;
     }
     
-    private HashSet<CardSideDTO> GetArtSideOnlyCardLink(CardDataDTO scryfallCardData)
+    private static HashSet<CardSideDTO> GetArtSideOnlyCardLink(CardDataDTO scryfallCardData)
     {
         var cardSides = new HashSet<CardSideDTO>
         {
@@ -216,7 +216,7 @@ public class ScryfallService(IScryfallClient scryfallApiClient,
         return cardSides;
     }
 
-    private void AddRelatedTokensToCardImages(CardEntryDTO card, CardDataDTO searchedCard)
+    private static void AddRelatedTokensToCardImages(CardEntryDTO card, CardDataDTO searchedCard)
     {
         var allParts = searchedCard!.AllParts?.Where(p => p.Component == ScryfallParts.COMPONENT_TOKEN);
         if (allParts is not null)

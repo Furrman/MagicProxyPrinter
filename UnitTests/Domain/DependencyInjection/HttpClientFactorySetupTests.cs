@@ -7,7 +7,7 @@ namespace UnitTests.Domain.DependencyInjection;
 
 public class HttpClientFactorySetupTests
 {
-    private static HttpClient CreateNamedClient(string? appVersion)
+    private static HttpClient CreateNamedClient(string? appVersion, string clientInterfaceName = nameof(IMoxfieldClient))
     {
         var services = new ServiceCollection();
         services.AddLogging();
@@ -15,7 +15,7 @@ public class HttpClientFactorySetupTests
         var provider = services.BuildServiceProvider();
 
         var factory = provider.GetRequiredService<IHttpClientFactory>();
-        return factory.CreateClient(nameof(IMoxfieldClient));
+        return factory.CreateClient(clientInterfaceName);
     }
 
     [Fact]
@@ -48,5 +48,19 @@ public class HttpClientFactorySetupTests
         using var client = CreateNamedClient("1.2.3");
 
         Assert.Equal(HttpClientSettings.MOXFIELD_BASE_URL, client.BaseAddress!.AbsoluteUri);
+    }
+
+    [Theory]
+    [InlineData(nameof(IArchidektClient))]
+    [InlineData(nameof(IMoxfieldClient))]
+    [InlineData(nameof(IEdhrecClient))]
+    [InlineData(nameof(IGoldfishClient))]
+    [InlineData(nameof(ICubeCobraClient))]
+    [InlineData(nameof(IScryfallClient))]
+    public void ConfigureHttpClients_SetsUserAgent_OnEveryRegisteredClient(string clientInterfaceName)
+    {
+        using var client = CreateNamedClient("1.2.3", clientInterfaceName);
+
+        Assert.Equal($"{HttpClientSettings.APP_NAME}/1.2.3", client.DefaultRequestHeaders.UserAgent.ToString());
     }
 }

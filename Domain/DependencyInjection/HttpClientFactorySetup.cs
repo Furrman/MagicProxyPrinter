@@ -22,6 +22,7 @@ public static class HttpClientFactorySetup
         {
             client.BaseAddress = new Uri(HttpClientSettings.ARCHIDEKT_BASE_URL);
             client.Timeout = DefaultTimeout;
+            client.DefaultRequestHeaders.Add("User-Agent", userAgent);
         }).AddPolicyHandler(GetRetryPolicy());
         services.AddHttpClient<IMoxfieldClient, MoxfieldClient>(client =>
         {

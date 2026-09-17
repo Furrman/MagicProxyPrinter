@@ -11,5 +11,5 @@ internal class LanguageCodes
     public const string JAPANESE_CODE = "ja";
     public const string KOREAN_CODE = "ko";
     public const string CHINESE_SIMPLIFIED_CODE = "zhs";
-    public const string CHINESE_TRADITIONAL_CODE_CODE = "zht";
+    public const string CHINESE_TRADITIONAL_CODE = "zht";
 }

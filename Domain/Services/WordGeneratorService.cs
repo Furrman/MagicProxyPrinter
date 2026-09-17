@@ -46,7 +46,7 @@ public class WordGeneratorService(ILogger<WordGeneratorService> logger, IScryfal
     private readonly IFileManager _fileManager = fileManager;
 
 
-    public async Task GenerateWord(DeckDetailsDTO deck, string? wordFileName = null, string? outputFolderDir = null, bool saveImages = false)
+    public async Task GenerateWord(DeckDetailsDTO deck, string? wordFileName = null, string? outputFolder = null, bool saveImages = false)
     {
         // Prepare
         int count = deck.Cards.SelectMany(c => c.CardSides).Count();
@@ -55,7 +55,7 @@ public class WordGeneratorService(ILogger<WordGeneratorService> logger, IScryfal
             RaiseDownloadImageError("No cards found in the deck");
             return;
         }
-        var outputFolderPath = _fileManager.CreateOutputFolder(outputFolderDir);
+        var outputFolderPath = _fileManager.CreateOutputFolder(outputFolder);
         if (outputFolderPath is null)
         {
             RaiseGenerateWordError("Error in creating output folder");

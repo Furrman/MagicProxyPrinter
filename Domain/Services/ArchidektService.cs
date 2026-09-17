@@ -73,7 +73,7 @@ public class ArchidektService(IArchidektClient archidektApiClient, ILogger<Archi
     }
 
 
-    private List<CardEntryDTO> ParseCardsToDeck(ICollection<DeckCardDTO> cardList)
+    private static List<CardEntryDTO> ParseCardsToDeck(ICollection<DeckCardDTO> cardList)
     {
         List<CardEntryDTO> deckCards = []; 
         foreach (var card in cardList)
