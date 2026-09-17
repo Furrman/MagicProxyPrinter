@@ -1,4 +1,3 @@
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Extensions.Http;
@@ -10,10 +9,15 @@ namespace Domain.DependencyInjection;
 public static class HttpClientFactorySetup
 {
     private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(HttpClientSettings.DEFAULT_TIMEOUT_SECONDS);
-    private static readonly string UserAgent = BuildUserAgent();
 
-    public static IServiceCollection ConfigureHttpClients(this IServiceCollection services)
+    /// <param name="appVersion">
+    /// The hosting application's version (e.g. "1.2.3"), sent as part of the User-Agent header.
+    /// Pass <c>null</c> (or leave it out) to send just the app name, without a version.
+    /// </param>
+    public static IServiceCollection ConfigureHttpClients(this IServiceCollection services, string? appVersion = null)
     {
+        var userAgent = BuildUserAgent(appVersion);
+
         services.AddHttpClient<IArchidektClient, ArchidektClient>(client =>
         {
             client.BaseAddress = new Uri(HttpClientSettings.ARCHIDEKT_BASE_URL);
@@ -23,33 +27,33 @@ public static class HttpClientFactorySetup
         {
             client.BaseAddress = new Uri(HttpClientSettings.MOXFIELD_BASE_URL);
             client.Timeout = DefaultTimeout;
-            client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+            client.DefaultRequestHeaders.Add("User-Agent", userAgent);
         }).AddPolicyHandler(GetRetryPolicy());
         services.AddHttpClient<IEdhrecClient, EdhrecClient>(client =>
         {
             client.BaseAddress = new Uri(HttpClientSettings.EDHREC_BASE_URL);
             client.Timeout = DefaultTimeout;
-            client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+            client.DefaultRequestHeaders.Add("User-Agent", userAgent);
         }).AddPolicyHandler(GetRetryPolicy());
         services.AddHttpClient<IGoldfishClient, GoldfishClient>(client =>
         {
             client.BaseAddress = new Uri(HttpClientSettings.GOLDFISH_BASE_URL);
             client.Timeout = DefaultTimeout;
-            client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+            client.DefaultRequestHeaders.Add("User-Agent", userAgent);
             client.DefaultRequestHeaders.Add("Accept", HttpClientSettings.ACCEPT_HTML);
         }).AddPolicyHandler(GetRetryPolicy());
         services.AddHttpClient<ICubeCobraClient, CubeCobraClient>(client =>
         {
             client.BaseAddress = new Uri(HttpClientSettings.CUBECOBRA_BASE_URL);
             client.Timeout = DefaultTimeout;
-            client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+            client.DefaultRequestHeaders.Add("User-Agent", userAgent);
             client.DefaultRequestHeaders.Add("Accept", HttpClientSettings.ACCEPT_HTML);
         }).AddPolicyHandler(GetRetryPolicy());
         services.AddHttpClient<IScryfallClient, ScryfallClient>(client =>
         {
             client.BaseAddress = new Uri(HttpClientSettings.SCRYFALL_BASE_URL);
             client.Timeout = DefaultTimeout;
-            client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+            client.DefaultRequestHeaders.Add("User-Agent", userAgent);
             client.DefaultRequestHeaders.Add("Accept", HttpClientSettings.ACCEPT_JSON);
         })
         .AddPolicyHandler(GetRetryPolicy());
@@ -57,12 +61,11 @@ public static class HttpClientFactorySetup
         return services;
     }
 
-    private static string BuildUserAgent()
+    private static string BuildUserAgent(string? appVersion)
     {
-        var version = Assembly.GetEntryAssembly()?.GetName().Version;
-        return version is null
+        return string.IsNullOrEmpty(appVersion)
             ? HttpClientSettings.APP_NAME
-            : $"{HttpClientSettings.APP_NAME}/{version.ToString(3)}";
+            : $"{HttpClientSettings.APP_NAME}/{appVersion}";
     }
 
     private static AsyncPolicy<HttpResponseMessage> GetRetryPolicy()
