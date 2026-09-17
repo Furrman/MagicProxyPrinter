@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Domain.Clients;
 
@@ -15,42 +15,8 @@ public interface ICubeCobraClient
     Task<string?> GetCardsInHtml(string relativePath);
 }
 
-// TODO Create generic client for clients that only retrieve directly HTML code
-public class CubeCobraClient(HttpClient httpClient, ILogger<CubeCobraClient> logger) : ICubeCobraClient
+public class CubeCobraClient(HttpClient httpClient, ILogger<CubeCobraClient> logger)
+    : HtmlScrapingClientBase<CubeCobraClient>(httpClient, logger), ICubeCobraClient
 {
-    private readonly HttpClient _httpClient = httpClient;
-    private readonly ILogger<CubeCobraClient> _logger = logger;
-
-    public async Task<string?> GetCardsInHtml(string relativePath)
-    {
-        HttpResponseMessage response;
-        try
-        {
-            response = await _httpClient.GetAsync($"/cube/list/{relativePath}");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "RelativePath: {relativePath} Error in getting card list from the deck", 
-                relativePath);
-            return null;
-        }
-
-        if (!response.IsSuccessStatusCode)
-        {
-            _logger.LogWarning("RelativePath: {relativePath} Failure response from getting card list from the deck Request: {statusCode} {reasonPhrase}", 
-                relativePath, response.StatusCode, response.ReasonPhrase);
-            return null;
-        }
-        
-        try
-        {
-            return await response.Content.ReadAsStringAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "RelativePath: {relativePath} Error in parsing card list from the deck", 
-                relativePath);
-            return null;
-        }
-    }
+    protected override string BuildRequestUri(string relativePath) => $"/cube/list/{relativePath}";
 }

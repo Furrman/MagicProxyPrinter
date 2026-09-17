@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Domain.Clients;
 
@@ -15,41 +15,5 @@ public interface IGoldfishClient
     Task<string?> GetCardsInHtml(string relativePath);
 }
 
-public class GoldfishClient(HttpClient httpClient, ILogger<GoldfishClient> logger) : IGoldfishClient
-{
-    private readonly HttpClient _httpClient = httpClient;
-    private readonly ILogger<GoldfishClient> _logger = logger;
-
-    public async Task<string?> GetCardsInHtml(string relativePath)
-    {
-        HttpResponseMessage response;
-        try
-        {
-            response = await _httpClient.GetAsync(relativePath);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "RelativePath: {relativePath} Error in getting card list from the deck", 
-                relativePath);
-            return null;
-        }
-
-        if (!response.IsSuccessStatusCode)
-        {
-            _logger.LogWarning("RelativePath: {relativePath} Failure response from getting card list from the deck Request: {statusCode} {reasonPhrase}", 
-                relativePath, response.StatusCode, response.ReasonPhrase);
-            return null;
-        }
-        
-        try
-        {
-            return await response.Content.ReadAsStringAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "RelativePath: {relativePath} Error in parsing card list from the deck", 
-                relativePath);
-            return null;
-        }
-    }
-}
+public class GoldfishClient(HttpClient httpClient, ILogger<GoldfishClient> logger)
+    : HtmlScrapingClientBase<GoldfishClient>(httpClient, logger), IGoldfishClient;

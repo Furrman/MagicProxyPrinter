@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Net.Http.Json;
+using Microsoft.Extensions.Logging;
 
 using Domain.Models.DTO.Archidekt;
 
@@ -18,43 +17,8 @@ public interface IArchidektClient
     Task<DeckDTO?> GetDeck(int deckId);
 }
 
-public class ArchidektClient(HttpClient httpClient, ILogger<ArchidektClient> logger) : IArchidektClient
+public class ArchidektClient(HttpClient httpClient, ILogger<ArchidektClient> logger)
+    : JsonDeckClientBase<ArchidektClient, int, DeckDTO>(httpClient, logger), IArchidektClient
 {
-    private readonly HttpClient _httpClient = httpClient;
-    private readonly ILogger<ArchidektClient> _logger = logger;
-
-    public async Task<DeckDTO?> GetDeck(int deckId)
-    {
-        DeckDTO? deckDto = null;
-        var requestUrl = $"decks/{deckId}/";
-        HttpResponseMessage response;
-        try
-        {
-            response = await _httpClient.GetAsync(requestUrl);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "DeckId: {deckId} Error in getting card list from the deck", deckId);
-            return deckDto;
-        }
-
-        if (response.IsSuccessStatusCode)
-        {
-            try
-            {
-                deckDto = await response.Content.ReadFromJsonAsync<DeckDTO>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "DeckId: {deckId} Error in parsing card list from the deck", deckId);
-                return null;
-            }
-        }
-        else
-        {
-            _logger.LogWarning("DeckId: {deckId} Failure response from getting card list from the deck Request: {statusCode} {reasonPhrase}", deckId, response.StatusCode, response.ReasonPhrase);
-        }
-
-        return deckDto;
-    }
+    protected override string BuildRequestUrl(int deckId) => $"decks/{deckId}/";
 }

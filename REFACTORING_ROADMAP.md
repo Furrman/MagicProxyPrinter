@@ -65,7 +65,7 @@ Recommended approach for the clients: introduce a fake/mockable `HttpMessageHand
 
 ---
 
-## Phase 3 — De-duplicate the HTTP clients
+## Phase 3 — De-duplicate the HTTP clients ✅ Done
 
 `Domain/Clients/CubeCobraClient.cs`, `EdhrecClient.cs`, and `GoldfishClient.cs` are structurally identical — same interface shape (`Task<string?> GetCardsInHtml(string relativePath)`), same try/catch/log pattern, differing only in the request path prefix. There's already a self-acknowledged TODO for this:
 
