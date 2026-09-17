@@ -36,7 +36,7 @@ public class LanguageService(ILogger<LanguageService> logger) : ILanguageService
         LanguageCodes.JAPANESE_CODE, 
         LanguageCodes.KOREAN_CODE,
         LanguageCodes.CHINESE_SIMPLIFIED_CODE, 
-        LanguageCodes.CHINESE_TRADITIONAL_CODE_CODE
+        LanguageCodes.CHINESE_TRADITIONAL_CODE
     ];
 
     public bool IsValidLanguage(string? languageCode) => languageCode is not null && _languages.Contains(languageCode);

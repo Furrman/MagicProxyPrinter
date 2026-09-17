@@ -4,6 +4,8 @@ Findings from a full solution scan (all `.cs` files in `ConsoleApp/`, `Domain/`,
 
 Suggested order: **Phase 1 → 2 → 3 → 4 → 5 → 6**, since later phases (de-duplicating clients/services) are safer once client-level tests exist to catch regressions.
 
+**Status: all 6 phases done**, each on its own stacked branch (`refactor/phase-1-correctness-bugs` → `refactor/phase-6-cleanup-hygiene`). The one still-open item is the "secondary, smaller finding" from Phase 4 (inline `new Regex(pattern)` per `TryExtract*` call, across all 5 services) — flagged there as independent of the de-dup and left for a follow-up.
+
 ---
 
 ## Phase 1 — Correctness bugs (small effort, do first)
@@ -125,19 +127,19 @@ Effort: medium-large. This is the highest-value structural cleanup in the codeba
 
 ---
 
-## Phase 6 — Naming, cleanup, and build hygiene
+## Phase 6 — Naming, cleanup, and build hygiene ✅ Done
 
 Small, independent fixes — good for filling gaps between the bigger phases.
 
-- **`ConsoleApp/Helpers/ConsoleExtensions.cs`** — file is named `ConsoleExtensions.cs` but the class inside is `ConsoleUtility`, and it contains no extension methods (no `this` parameters). Rename the file to match the class, or rename the class if extension methods were originally intended.
-- **`Domain/Constants/LanguageCodes.cs:14`** — `CHINESE_TRADITIONAL_CODE_CODE` has a duplicated `_CODE` suffix (typo).
-- **`Domain/Clients/MoxfieldClient.cs:9`** — XML doc comment on `IMoxfieldClient` says *"interface for interacting with the Archidekt API"* — copy-pasted from `ArchidektClient`, should reference Moxfield.
-- **`Domain/DependencyInjection/HttpClientFactorySetup.cs:12`** — `// TODO Use const value for User-Agent with app version`. Also note only 4 of the 6 registered clients set a `User-Agent` header at all (`ArchidektClient`'s registration at line 13-17 has none) — inconsistent, and some sites may rate-limit/block requests without one.
-- **`Domain/GlobalSuppressions.cs`** — suppresses `CA1822` ("mark members as static") on 7 methods across `FileManager` and `Services`, with the justification `"Avoid using static methods"` on every entry. That justification is circular (CA1822 exists specifically to *suggest* static) — either give each suppression a real reason (e.g. "kept as instance methods for mock-based testability/consistency with the rest of the class") or reconsider whether these should just be static.
-- **Constants visibility is inconsistent** — `CardDetails`, `DeckBuilders`, `FilePaths`, `LanguageCodes` are `internal class`, but `ScryfallParts` (`Domain/Constants/ScryfallParts.cs:3`) is `public class` with no apparent reason for the difference.
-- **`Domain/Services/WordGeneratorService.cs`** — the interface (`IWordGeneratorService.GenerateWord`, line 34) names the output-folder parameter `outputFolder`; the implementation (line 49) names it `outputFolderDir`. Harmless today (no named-argument call sites), but worth aligning.
-- **No `Directory.Build.props`** — `TargetFramework net10.0`, `ImplicitUsings`, and `Nullable enable` are duplicated identically across all three `.csproj` files. A solution-level `Directory.Build.props` would remove the duplication and reduce drift risk as the solution grows (already 5 separate `10.0.8` version pins across `ConsoleApp.csproj`/`Domain.csproj`). Consider pairing with `Directory.Packages.props` (central package management) at the same time.
-- **DI lifetime choice is arbitrary for a CLI tool.** Every Domain service in `ServicesRegistration.cs` is registered `Scoped`, but `Program.cs` never creates a scope — it resolves directly from the root provider, so in practice everything behaves like a singleton for the process's lifetime anyway (see Phase 1 #4 / Phase 5 #3). Worth either creating an explicit scope per run, or switching registrations to `Singleton`/`Transient` deliberately instead of `Scoped` by default.
+- ~~**`ConsoleApp/Helpers/ConsoleExtensions.cs`**~~ — renamed to `ConsoleUtility.cs` to match the class it contains.
+- ~~**`Domain/Constants/LanguageCodes.cs:14`**~~ — `CHINESE_TRADITIONAL_CODE_CODE` → `CHINESE_TRADITIONAL_CODE` (and its one call site in `LanguageService.cs`).
+- ~~**`Domain/Clients/MoxfieldClient.cs:9`**~~ — fixed during Phase 3's client de-duplication.
+- ~~**`Domain/DependencyInjection/HttpClientFactorySetup.cs:12`**~~ — the TODO was resolved earlier (User-Agent now built from the app version); `ArchidektClient`'s registration was still missing the `User-Agent` header entirely, now added for consistency with the other 5 clients.
+- ~~**`Domain/GlobalSuppressions.cs`**~~ — the 5 suppressions on genuinely side-effect-free private helpers (`ArchidektService.ParseCardsToDeck`, `ScryfallService.IsArtCard`/`IsDualSideCard`/`GetArtSideOnlyCardLink`/`AddRelatedTokensToCardImages`) were removed and those methods made `static`, satisfying CA1822 for real. The remaining 4 (`FileManager`'s public `IFileManager` members) got an accurate justification: they can't be static because they're interface members injected/mocked in tests.
+- ~~**Constants visibility**~~ — `ScryfallParts` made `internal` to match `CardDetails`/`DeckBuilders`/`FilePaths`/`LanguageCodes`, now that `Domain` grants `UnitTests` `InternalsVisibleTo`.
+- ~~**`Domain/Services/WordGeneratorService.cs`**~~ — implementation's `outputFolderDir` parameter renamed to `outputFolder` to match the interface.
+- ~~**No `Directory.Build.props`**~~ — added, holding the shared `TargetFramework`/`ImplicitUsings`/`Nullable`. Paired with `Directory.Packages.props` (central package management) for all 15 package version pins. Verified the self-contained single-file publish (`dotnet publish ... -p:GitTagVersion=1.2.3`) still produces a working binary reporting the right version.
+- ~~**DI lifetime choice**~~ — `Program.cs` now creates an explicit `IServiceScope` per run instead of resolving straight off the root provider, so the `Scoped` registrations in `ServicesRegistration.cs` are semantically meaningful and scoped disposables are freed as soon as the run finishes.
 
 ---
 

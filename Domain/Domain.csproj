@@ -1,22 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
   <ItemGroup>
     <InternalsVisibleTo Include="UnitTests" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="10.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.8" />
-    <PackageReference Include="OfficeIMO.Word" Version="1.0.52" />
+    <PackageReference Include="HtmlAgilityPack" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="OfficeIMO.Word" />
   </ItemGroup>
 
 </Project>
