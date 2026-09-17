@@ -1,9 +1,6 @@
 using System.Net;
-
 using Microsoft.Extensions.Logging;
-
 using Moq;
-
 using Domain.Clients;
 
 namespace UnitTests.Domain.Clients;
