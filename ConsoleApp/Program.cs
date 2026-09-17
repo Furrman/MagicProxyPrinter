@@ -13,7 +13,7 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        var serviceProvider = DependencyInjectionConfigurator.Setup();
+        using var serviceProvider = DependencyInjectionConfigurator.Setup();
 
         CoconoaApp.Run(([CoconoaOptions(Description = "Filepath to exported deck")] string? deckFilePath,
             [CoconoaOptions(Description = "URL link to deck")]string? deckUrl,

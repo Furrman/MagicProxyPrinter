@@ -104,7 +104,7 @@ public class ScryfallClient(HttpClient httpClient, ILogger<ScryfallClient> logge
         var requestUrl = $"cards/{expansionCode}/{collectorNumber}";
         if (languageCode is not null)
         {
-            requestUrl += $"{languageCode}";
+            requestUrl += $"/{languageCode}";
         }
 
         try
@@ -135,7 +135,7 @@ public class ScryfallClient(HttpClient httpClient, ILogger<ScryfallClient> logge
     public async Task<CardSearchDTO?> SearchCard(string cardName, bool includeExtras, bool includeMultilingual)
     {
         CardSearchDTO? cardSearch = null;
-        var requestUrl = $"cards/search?q=${cardName}";
+        var requestUrl = $"cards/search?q={Uri.EscapeDataString(cardName)}";
         if (includeExtras)
         {
             requestUrl += "&unique=prints&include_extras=true&include_variations=true";
