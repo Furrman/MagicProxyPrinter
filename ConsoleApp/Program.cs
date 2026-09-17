@@ -6,6 +6,7 @@ using Domain.Services;
 using Domain.Models.Events;
 using ConsoleApp.Configuration;
 using ConsoleApp.Helpers;
+using ConsoleApp.Validation;
 
 namespace ConsoleApp;
 
@@ -25,34 +26,14 @@ internal class Program
             [CoconoaOptions(Description = "Include emblems attached to a cards into output document")] bool includeEmblems = false,
             [CoconoaOptions(Description = "Flag to store original images in the same folder as output file")] bool storeOriginalImages = false) =>
         {
-            if (deckFilePath is null && deckUrl is null)
-            {
-                ConsoleUtility.WriteErrorMessage("""
-You have to provide at least one from this list:
-                - path to exported deck
-                - url to your deck.
-                
-                Use --help to see more information.
-""");
-                return -1;
-            }
-
             var languageService = serviceProvider.GetService<ILanguageService>()!;
-            if (languageCode is not null && languageService.IsValidLanguage(languageCode) == false)
+            var validationErrors = InputValidator.Validate(deckFilePath, deckUrl, languageCode, tokenCopies, languageService);
+            if (validationErrors.Count > 0)
             {
-                ConsoleUtility.WriteErrorMessage("You have to specify correct language code.");
-                ConsoleUtility.WriteErrorMessage($"Language codes: {languageService.AvailableLanguages}");
-                return -1;
-            }
-
-            if (tokenCopies <= 0)
-            {
-                ConsoleUtility.WriteErrorMessage("Number of copies for each token has to be greater than 0.");
-                return -1;
-            }
-            if (tokenCopies > 100)
-            {
-                ConsoleUtility.WriteErrorMessage("Number of copies for each token has to be less than 100.");
+                foreach (var error in validationErrors)
+                {
+                    ConsoleUtility.WriteErrorMessage(error);
+                }
                 return -1;
             }
 
