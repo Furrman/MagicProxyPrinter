@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Xml;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Config;
@@ -14,15 +13,12 @@ internal static class NLogConfigurator
         var assembly = Assembly.GetExecutingAssembly();
         var resourceName = assembly.GetManifestResourceNames().Single(str => str.EndsWith("nlog.config"));
 
-        string configContent = string.Empty;
-        using Stream? stream = assembly.GetManifestResourceStream(resourceName);
-        if (stream is not null)
-        {
-            using StreamReader reader = new(stream!);
-            configContent = reader.ReadToEnd();
-        }
+        using Stream stream = assembly.GetManifestResourceStream(resourceName)
+            ?? throw new InvalidOperationException($"Embedded NLog config resource '{resourceName}' not found.");
+        using StreamReader reader = new(stream);
+        var configContent = reader.ReadToEnd();
 
-        var nlogConfig = new XmlLoggingConfiguration(XmlReader.Create(new StringReader(configContent)));
+        var nlogConfig = XmlLoggingConfiguration.CreateFromXmlString(configContent);
 
         return serviceCollection
             .AddLogging(builder =>
